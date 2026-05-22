@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KontaktFlow — FlowGate AI</title>
+<meta name="description" content="Digitales Kontakt-Management für Versicherungsvermittler — FlowGate AI">
+<meta name="theme-color" content="#005A96">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KontaktFlow">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --fg-blue:#007ACB;--fg-blue-dark:#005A96;--fg-blue-light:#E6F3FB;
+  --fg-orange:#FF6600;--fg-orange-light:#FFF3E8;
+  --gray-900:#212121;--gray-700:#616161;--gray-500:#9E9E9E;
+  --gray-300:#E0E0E0;--gray-100:#F5F5F5;--gray-50:#FAFAFA;
+  --safe-green:#86B817;--safe-green-bg:#F2F8E6;
+  --warn-red:#CC2936;--warn-red-bg:#FDEDEF;
+  --white:#FFFFFF;
+  --bg:#F5F5F5;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.03);
+  --shadow-lg:0 8px 24px rgba(0,0,0,.07),0 2px 8px rgba(0,0,0,.04);
+  --radius:14px;--radius-sm:10px;
+}
+html{font-size:15px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,system-ui,sans-serif;background:var(--bg);color:var(--gray-900);height:100vh;overflow:hidden}
+
+/* ===== SIDEBAR ===== */
+.sidebar{width:240px;min-height:100vh;background:linear-gradient(180deg,var(--fg-blue-dark),#003F6B);color:#fff;display:flex;flex-direction:column;padding:0;position:fixed;left:0;top:0;bottom:0;z-index:100}
+.sidebar-top-bar{height:4px;background:var(--fg-blue);width:100%;flex-shrink:0}
+.sidebar-accent-bar{height:2px;background:var(--fg-orange);width:100%;flex-shrink:0}
+.logo{padding:24px 22px 28px;display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:var(--fg-orange);display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:18px;height:18px;fill:white}
+.logo-text{display:flex;flex-direction:column}
+.logo-brand{font-size:.68rem;font-weight:700;color:var(--fg-orange);letter-spacing:2px;text-transform:uppercase}
+.logo-name{font-size:1.2rem;font-weight:700;letter-spacing:-.3px;margin-top:1px}
+
+.nav-items{list-style:none;flex:1;padding:0 10px}
+.nav-items li{padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:11px;font-size:.9rem;color:rgba(255,255,255,.55);transition:all .2s;border-radius:var(--radius-sm);font-weight:500;margin-bottom:2px}
+.nav-items li:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav-items li.active{color:#fff;background:rgba(0,122,203,.3)}
+.nav-items li svg{width:19px;height:19px;opacity:.7}
+.nav-items li.active svg{opacity:1}
+
+.sidebar-stats{padding:18px 22px;border-top:1px solid rgba(255,255,255,.08);margin-top:auto}
+.sidebar-stats .stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.8rem;color:rgba(255,255,255,.45)}
+.sidebar-stats .stat-row span:last-child{font-weight:600;color:rgba(255,255,255,.75)}
+.sidebar-footer{padding:14px 22px;border-top:1px solid rgba(255,255,255,.06);font-size:.68rem;color:rgba(255,255,255,.25);text-align:center;letter-spacing:.5px}
+
+/* ===== MAIN ===== */
+main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
+.page-top-accent{height:4px;background:var(--fg-blue);position:sticky;top:0;z-index:50}
+.page-header{padding:28px 36px 0;display:flex;justify-content:space-between;align-items:center}
+.page-header h1{font-size:1.5rem;font-weight:700;color:var(--fg-blue-dark);letter-spacing:-.3px}
+.page-content{padding:24px 36px 36px}
+
+/* ===== BUTTONS ===== */
+.btn{padding:10px 20px;border:none;border-radius:var(--radius-sm);font-size:.87rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;font-family:inherit}
+.btn-primary{background:var(--fg-blue);color:#fff}
+.btn-primary:hover{background:var(--fg-blue-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,122,203,.25)}
+.btn-orange{background:var(--fg-orange);color:#fff}
+.btn-orange:hover{background:#E55C00;transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,102,0,.25)}
+.btn-secondary{background:var(--white);color:var(--gray-900);border:1px solid var(--gray-300)}
+.btn-secondary:hover{border-color:var(--fg-blue);color:var(--fg-blue)}
+.btn-ghost{background:transparent;color:var(--gray-700);padding:8px 12px}
+.btn-ghost:hover{color:var(--fg-blue);background:var(--fg-blue-light)}
+.btn-danger{background:transparent;color:var(--warn-red);padding:8px 12px}
+.btn-danger:hover{background:var(--warn-red-bg)}
+.btn-sm{padding:7px 14px;font-size:.82rem}
+
+/* ===== CARDS ===== */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;transition:all .25s}
+.card:hover{box-shadow:var(--shadow-lg)}
+
+/* ===== SECTION HEADER (numbered circle) ===== */
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.section-num{width:28px;height:28px;border-radius:50%;background:var(--fg-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0}
+.section-title-text{font-size:1.05rem;font-weight:700;color:var(--fg-blue-dark)}
+.section-accent{width:40px;height:2px;background:var(--fg-orange);margin:6px 0 16px 40px;border-radius:1px}
+
+/* ===== STATS ROW ===== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
+.stat-card{background:var(--white);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:all .25s;border-left:4px solid transparent}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);cursor:pointer}
+.stat-card .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:1.1rem}
+.stat-card .stat-number{font-size:1.7rem;font-weight:700;letter-spacing:-.5px;color:var(--fg-blue-dark)}
+.stat-card .stat-label{font-size:.8rem;color:var(--gray-500);margin-top:3px;font-weight:500}
+.stat-card.green{border-left-color:var(--safe-green)}
+.stat-card.green .stat-icon{background:var(--safe-green-bg);color:var(--safe-green)}
+.stat-card.yellow{border-left-color:var(--fg-orange)}
+.stat-card.yellow .stat-icon{background:var(--fg-orange-light);color:var(--fg-orange)}
+.stat-card.red{border-left-color:var(--warn-red)}
+.stat-card.red .stat-icon{background:var(--warn-red-bg);color:var(--warn-red)}
+.stat-card.total{border-left-color:var(--fg-blue)}
+.stat-card.total .stat-icon{background:var(--fg-blue-light);color:var(--fg-blue)}
+
+/* ===== DASHBOARD GRID ===== */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+/* ===== TODAY LIST ===== */
+.today-list{display:flex;flex-direction:column;gap:8px}
+.today-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--gray-50);cursor:pointer;transition:all .2s;border-left:3px solid transparent}
+.today-item:hover{background:var(--fg-blue-light);transform:translateX(4px);border-left-color:var(--fg-blue)}
+.today-item .priority-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.today-item .ti-info{flex:1;min-width:0}
+.today-item .ti-name{font-weight:600;font-size:.88rem;color:var(--gray-900)}
+.today-item .ti-context{font-size:.77rem;color:var(--gray-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.today-item .ti-action{font-size:.77rem;color:var(--fg-blue);font-weight:600;flex-shrink:0}
+
+/* ===== ACTIVITY ===== */
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100)}
+.activity-item:last-child{border:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;background:var(--fg-blue);margin-top:6px;flex-shrink:0}
+.activity-text{font-size:.84rem;color:var(--gray-700);line-height:1.5}
+.activity-text strong{color:var(--gray-900);font-weight:600}
+.activity-time{font-size:.73rem;color:var(--gray-500);margin-top:2px}
+
+/* ===== CONTACTS TOOLBAR ===== */
+.contacts-toolbar{display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap}
+.search-box{flex:1;min-width:200px;position:relative}
+.search-box input{width:100%;padding:10px 16px 10px 40px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:.9rem;background:var(--white);transition:all .2s;font-family:inherit}
+.search-box input:focus{outline:none;border-color:var(--fg-blue);box-shadow:0 0 0 3px rgba(0,122,203,.1)}
+.search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--gray-500)}
+.filter-pills{display:flex;gap:6px}
+.filter-pill{padding:7px 16px;border-radius:20px;font-size:.82rem;font-weight:500;cursor:pointer;border:1px solid var(--gray-300);background:var(--white);color:var(--gray-700);transition:all .2s}
+.filter-pill:hover{border-color:var(--gray-500)}
+.filter-pill.active{background:var(--fg-blue);color:#fff;border-color:var(--fg-blue)}
+.filter-pill.active-green{background:var(--safe-green);color:#fff;border-color:var(--safe-green)}
+.filter-pill.active-yellow{background:var(--fg-orange);color:#fff;border-color:var(--fg-orange)}
+.filter-pill.active-red{background:var(--warn-red);color:#fff;border-color:var(--warn-red)}
+
+/* ===== CONTACT CARDS ===== */
+.contacts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.contact-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:all .25s;cursor:pointer;border-left:4px solid transparent;position:relative}
+.contact-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.contact-card.p-green{border-left-color:var(--safe-green)}
+.contact-card.p-yellow{border-left-color:var(--fg-orange)}
+.contact-card.p-red{border-left-color:var(--warn-red)}
+.cc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.cc-name{font-weight:700;font-size:1.02rem;color:var(--fg-blue-dark)}
+.cc-priority{padding:4px 10px;border-radius:12px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.cc-priority.green{background:var(--safe-green-bg);color:var(--safe-green)}
+.cc-priority.yellow{background:var(--fg-orange-light);color:var(--fg-orange)}
+.cc-priority.red{background:var(--warn-red-bg);color:var(--warn-red)}
+.cc-details{display:flex;flex-direction:column;gap:5px}
+.cc-detail{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--gray-700)}
+.cc-detail svg{width:15px;height:15px;flex-shrink:0;color:var(--gray-500)}
+.cc-links{margin-top:12px;padding-top:12px;border-top:1px solid var(--gray-100);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cc-link-badge{padding:3px 10px;background:var(--fg-blue-light);color:var(--fg-blue);border-radius:12px;font-size:.74rem;font-weight:500}
+.cc-footer{margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+.cc-last-seen{font-size:.76rem;color:var(--gray-500)}
+
+/* ===== NETWORK ===== */
+#network-canvas{width:100%;border-radius:var(--radius);background:var(--white);box-shadow:var(--shadow);cursor:grab}
+#network-canvas:active{cursor:grabbing}
+.network-legend{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.83rem;color:var(--gray-700)}
+.legend-dot{width:12px;height:12px;border-radius:50%}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,58,107,.35);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--radius);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.15);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.98)}to{opacity:1;transform:none}}
+.modal-top-bar{height:4px;background:var(--fg-blue);border-radius:var(--radius) var(--radius) 0 0}
+.modal-header{padding:22px 28px 0;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1.15rem;font-weight:700;color:var(--fg-blue-dark)}
+.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:var(--gray-50);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray-700);font-size:1.1rem;transition:all .2s}
+.modal-close:hover{background:var(--gray-100);color:var(--gray-900)}
+.modal-body{padding:20px 28px 28px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--gray-500);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 14px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:.9rem;font-family:inherit;transition:all .2s;background:var(--white)}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--fg-blue);box-shadow:0 0 0 3px rgba(0,122,203,.1)}
+.form-group textarea{resize:vertical;min-height:70px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* Priority Select */
+.priority-select{display:flex;gap:8px}
+.priority-option{flex:1;padding:10px;border:2px solid var(--gray-300);border-radius:var(--radius-sm);text-align:center;cursor:pointer;font-size:.84rem;font-weight:600;transition:all .2s;color:var(--gray-700)}
+.priority-option:hover{transform:translateY(-1px)}
+.priority-option.green.selected{border-color:var(--safe-green);background:var(--safe-green-bg);color:var(--safe-green)}
+.priority-option.yellow.selected{border-color:var(--fg-orange);background:var(--fg-orange-light);color:var(--fg-orange)}
+.priority-option.red.selected{border-color:var(--warn-red);background:var(--warn-red-bg);color:var(--warn-red)}
+.modal-footer{padding:0 28px 24px;display:flex;justify-content:flex-end;gap:10px}
+
+/* Link Section */
+.link-section{margin-top:8px}
+.link-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.link-tag{display:flex;align-items:center;gap:6px;padding:5px 12px;background:var(--fg-blue-light);color:var(--fg-blue);border-radius:16px;font-size:.82rem;font-weight:500}
+.link-tag .remove-link{cursor:pointer;opacity:.6;font-size:.9rem}
+.link-tag .remove-link:hover{opacity:1}
+.link-add{display:flex;gap:8px;margin-top:8px}
+.link-add select{flex:1;padding:8px 12px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:.85rem;font-family:inherit}
+
+/* ===== DETAIL PANEL ===== */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,58,107,.35);backdrop-filter:blur(6px);z-index:900;display:none;justify-content:flex-end}
+.detail-overlay.open{display:flex}
+.detail-panel{width:480px;background:var(--white);height:100vh;overflow-y:auto;box-shadow:-10px 0 30px rgba(0,0,0,.1);animation:slideIn .3s ease}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}
+.detail-top-bar{height:4px;background:var(--fg-blue)}
+.detail-header{padding:28px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--gray-100)}
+.detail-header .dh-left h2{font-size:1.25rem;font-weight:700;color:var(--fg-blue-dark);margin-bottom:6px}
+.detail-header .dh-left .dh-priority{display:inline-block;padding:4px 12px;border-radius:12px;font-size:.76rem;font-weight:600}
+.detail-body{padding:28px}
+.detail-section{margin-bottom:24px}
+.detail-section h3{font-size:.78rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.detail-section-bar{width:30px;height:2px;background:var(--fg-orange);margin:-6px 0 12px;border-radius:1px}
+.detail-field{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:.88rem}
+.detail-field svg{width:17px;height:17px;color:var(--gray-500);flex-shrink:0;margin-top:2px}
+.detail-field .df-value{color:var(--gray-900)}
+.detail-field .df-empty{color:var(--gray-500);font-style:italic}
+.detail-links{display:flex;flex-direction:column;gap:8px}
+.detail-link-card{display:flex;align-items:center;gap:12px;padding:12px;background:var(--gray-50);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;border-left:3px solid transparent}
+.detail-link-card:hover{background:var(--fg-blue-light);transform:translateX(4px);border-left-color:var(--fg-blue)}
+.detail-link-card .dlc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.detail-link-card .dlc-name{font-weight:600;font-size:.88rem;color:var(--fg-blue-dark)}
+.detail-link-card .dlc-context{font-size:.76rem;color:var(--gray-500)}
+.detail-actions{display:flex;gap:10px;padding:28px;border-top:1px solid var(--gray-100)}
+
+/* Quick Priority in Detail */
+.quick-priority{display:flex;gap:6px;margin-top:8px}
+.qp-btn{width:32px;height:32px;border-radius:50%;border:2px solid var(--gray-300);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--white)}
+.qp-btn:hover{transform:scale(1.15)}
+.qp-btn.active{box-shadow:0 0 0 3px rgba(0,0,0,.1)}
+
+/* Quick Link Search in Detail */
+.quick-link-box{margin-top:10px;position:relative}
+.quick-link-input{width:100%;padding:9px 14px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:.85rem;font-family:inherit;transition:all .2s}
+.quick-link-input:focus{outline:none;border-color:var(--fg-blue);box-shadow:0 0 0 3px rgba(0,122,203,.1)}
+.quick-link-results{position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--white);border:1px solid var(--gray-300);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);max-height:200px;overflow-y:auto;z-index:10;display:none}
+.quick-link-results.open{display:block}
+.qlr-item{padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:.85rem;transition:all .15s}
+.qlr-item:hover{background:var(--fg-blue-light)}
+.qlr-item .qlr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.qlr-item .qlr-name{font-weight:600;color:var(--fg-blue-dark)}
+.qlr-item .qlr-phone{font-size:.76rem;color:var(--gray-500);margin-left:auto}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:60px 20px;color:var(--gray-500)}
+.empty-state svg{width:64px;height:64px;color:var(--gray-300);margin-bottom:16px}
+.empty-state h3{font-size:1.05rem;color:var(--gray-900);margin-bottom:8px}
+.empty-state p{font-size:.88rem;margin-bottom:20px}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;background:var(--fg-blue-dark);color:#fff;border-radius:var(--radius-sm);font-size:.87rem;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:2000;transform:translateY(100px);opacity:0;transition:all .3s ease;border-left:4px solid var(--fg-orange)}
+.toast.show{transform:none;opacity:1}
+
+/* ===== GRADIENT BAR ===== */
+.gradient-bar{height:3px;background:linear-gradient(90deg,var(--fg-blue),var(--fg-orange));border-radius:2px}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--gray-500)}
+
+.view{display:none}.view.active{display:block}
+
+/* ===== FOCUS MODE ===== */
+.focus-start{text-align:center;padding:60px 20px}
+.focus-start h2{font-size:1.4rem;color:var(--fg-blue-dark);margin-bottom:8px}
+.focus-start p{color:var(--gray-500);margin-bottom:28px;font-size:.92rem}
+.timer-options{display:flex;gap:12px;justify-content:center;margin-bottom:24px}
+.timer-opt{width:80px;height:80px;border-radius:var(--radius);border:2px solid var(--gray-300);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;background:var(--white)}
+.timer-opt:hover{border-color:var(--fg-blue);transform:translateY(-2px)}
+.timer-opt.selected{border-color:var(--fg-orange);background:var(--fg-orange-light)}
+.timer-opt .to-min{font-size:1.4rem;font-weight:700;color:var(--fg-blue-dark)}
+.timer-opt .to-label{font-size:.7rem;color:var(--gray-500);margin-top:2px}
+.focus-active{max-width:600px;margin:0 auto}
+.focus-timer-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--fg-blue-dark);color:#fff;border-radius:var(--radius-sm);margin-bottom:20px}
+.focus-timer-bar .ftb-time{font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums}
+.focus-timer-bar .ftb-progress{font-size:.85rem;opacity:.7}
+.focus-progress{height:4px;background:var(--gray-100);border-radius:2px;margin-bottom:24px;overflow:hidden}
+.focus-progress-fill{height:100%;background:linear-gradient(90deg,var(--fg-blue),var(--fg-orange));border-radius:2px;transition:width .3s}
+.focus-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:28px;animation:modalIn .3s ease}
+.focus-card .fc-name{font-size:1.3rem;font-weight:700;color:var(--fg-blue-dark);margin-bottom:4px}
+.focus-card .fc-phone{font-size:.9rem;color:var(--gray-500);margin-bottom:20px}
+.focus-card .fc-section{margin-bottom:16px}
+.focus-card .fc-label{font-size:.76rem;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.cat-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cat-pill{padding:6px 14px;border-radius:20px;border:1px solid var(--gray-300);font-size:.8rem;cursor:pointer;transition:all .15s;background:var(--white);color:var(--gray-700)}
+.cat-pill:hover{border-color:var(--fg-blue)}
+.cat-pill.selected{background:var(--fg-blue);color:#fff;border-color:var(--fg-blue)}
+.focus-card .fc-priority{display:flex;gap:8px}
+.focus-card .fp-btn{flex:1;padding:12px;border:2px solid var(--gray-300);border-radius:var(--radius-sm);text-align:center;cursor:pointer;font-weight:600;font-size:.88rem;transition:all .2s}
+.focus-card .fp-btn:hover{transform:translateY(-1px)}
+.focus-card .fp-btn.sel-green{border-color:var(--safe-green);background:var(--safe-green-bg);color:var(--safe-green)}
+.focus-card .fp-btn.sel-yellow{border-color:var(--fg-orange);background:var(--fg-orange-light);color:var(--fg-orange)}
+.focus-card .fp-btn.sel-red{border-color:var(--warn-red);background:var(--warn-red-bg);color:var(--warn-red)}
+.focus-link-area{margin-top:6px}
+.focus-actions{display:flex;gap:10px;margin-top:20px}
+.focus-actions .btn{flex:1;justify-content:center}
+.focus-summary{text-align:center;padding:40px 20px}
+.focus-summary h2{font-size:1.3rem;color:var(--fg-blue-dark);margin-bottom:8px}
+.focus-summary .fs-stats{display:flex;gap:20px;justify-content:center;margin:20px 0}
+.focus-summary .fs-stat{text-align:center}
+.focus-summary .fs-stat .fs-num{font-size:1.6rem;font-weight:700;color:var(--fg-blue-dark)}
+.focus-summary .fs-stat .fs-label{font-size:.78rem;color:var(--gray-500)}
+
+/* ===== CALL STATUS ===== */
+.call-status-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.cs-pill{padding:5px 12px;border-radius:16px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid var(--gray-300);transition:all .15s;background:var(--white)}
+.cs-pill:hover{transform:translateY(-1px)}
+.cs-pill.active{border-color:currentColor}
+.call-log{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.call-log-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--gray-50);border-radius:var(--radius-sm);font-size:.82rem}
+.call-log-item .cl-date{color:var(--gray-500);font-size:.75rem;margin-left:auto}
+.cc-call-status{padding:3px 10px;border-radius:12px;font-size:.7rem;font-weight:600}
+
+/* ===== DATA TOOLBAR ===== */
+.data-toolbar{display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)}
+.data-toolbar .btn-data{padding:7px 12px;border:none;border-radius:var(--radius-sm);font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;transition:all .2s;background:rgba(255,255,255,.08);color:rgba(255,255,255,.55)}
+.data-toolbar .btn-data:hover{background:rgba(255,255,255,.15);color:#fff}
+.data-toolbar .btn-data svg{width:14px;height:14px}
+
+/* ===== RESPONSIVE (MOBILE) ===== */
+@media(max-width:768px){
+  .sidebar{width:100%;min-height:auto;height:auto;position:fixed;top:auto;bottom:0;left:0;right:0;flex-direction:row;padding:0;z-index:200;background:var(--fg-blue-dark);border-radius:0}
+  .sidebar-top-bar,.sidebar-accent-bar,.logo,.sidebar-stats,.sidebar-footer,.data-toolbar{display:none}
+  .nav-items{display:flex;flex-direction:row;justify-content:space-around;padding:6px 0;margin:0}
+  .nav-items li{flex-direction:column;gap:3px;padding:8px 4px;font-size:.65rem;border-radius:0;margin:0;text-align:center;min-width:0}
+  .nav-items li svg{width:22px;height:22px}
+  main{position:fixed;left:0;top:0;right:0;bottom:64px;padding:0}
+  .page-header{padding:16px 16px 0}
+  .page-header h1{font-size:1.2rem}
+  .page-content{padding:14px 16px 20px}
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+  .stat-card{padding:14px 16px}
+  .stat-card .stat-number{font-size:1.3rem}
+  .grid-2{grid-template-columns:1fr;gap:14px}
+  .contacts-grid{grid-template-columns:1fr}
+  .contacts-toolbar{flex-direction:column;gap:8px}
+  .search-box{min-width:0;width:100%}
+  .filter-pills{justify-content:center}
+  .detail-panel{width:100vw}
+  .modal{max-width:95vw}
+  .focus-active{max-width:100%}
+  .focus-card{padding:18px}
+  .cat-grid{gap:4px}
+  .cat-pill{padding:5px 10px;font-size:.75rem}
+  .timer-options{gap:8px}
+  .timer-opt{width:66px;height:66px}
+  .btn{padding:8px 16px;font-size:.82rem}
+  .form-row{grid-template-columns:1fr}
+  #network-canvas{height:400px}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-card .stat-icon{width:30px;height:30px;font-size:.9rem;margin-bottom:8px}
+  .focus-card .fc-name{font-size:1.1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-top-bar"></div>
+  <div class="sidebar-accent-bar"></div>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    </div>
+    <div class="logo-text">
+      <span class="logo-brand">FLOWGATE AI</span>
+      <span class="logo-name">KontaktFlow</span>
+    </div>
+  </div>
+  <ul class="nav-items">
+    <li class="active" data-view="dashboard" onclick="switchView('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </li>
+    <li data-view="contacts" onclick="switchView('contacts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Kontakte
+    </li>
+    <li data-view="focus" onclick="switchView('focus')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Fokus
+    </li>
+    <li data-view="network" onclick="switchView('network')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/><line x1="5" y1="19" x2="19" y2="19"/></svg>
+      Netzwerk
+    </li>
+  </ul>
+  <div class="sidebar-stats" id="sidebar-stats"></div>
+  <div class="data-toolbar">
+    <button class="btn-data" onclick="exportData()" title="Daten als JSON exportieren">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+    <button class="btn-data" onclick="document.getElementById('import-file').click()" title="Daten aus JSON importieren">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import
+    </button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+  <div class="sidebar-footer">FLOWGATE AI</div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div class="page-top-accent"></div>
+
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <button class="btn btn-primary" onclick="openAddModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Neuer Kontakt
+      </button>
+    </div>
+    <div class="page-content">
+      <div class="stats-row" id="stats-row"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-header">
+            <div class="section-num">1</div>
+            <span class="section-title-text">Heute kontaktieren</span>
+          </div>
+          <div class="section-accent"></div>
+          <div class="today-list" id="today-list"></div>
+        </div>
+        <div class="card">
+          <div class="section-header">
+            <div class="section-num">2</div>
+            <span class="section-title-text">Letzte Aktivitäten</span>
+          </div>
+          <div class="section-accent"></div>
+          <div id="activity-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACTS -->
+  <div class="view" id="view-contacts">
+    <div class="page-header">
+      <h1>Kontakte</h1>
+      <button class="btn btn-primary" onclick="openAddModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Neuer Kontakt
+      </button>
+    </div>
+    <div class="page-content">
+      <div class="contacts-toolbar">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-input" placeholder="Kontakt suchen..." oninput="renderContacts()">
+        </div>
+        <div class="filter-pills">
+          <div class="filter-pill active" data-filter="all" onclick="setFilter('all')">Alle</div>
+          <div class="filter-pill" data-filter="green" onclick="setFilter('green')">Heiß</div>
+          <div class="filter-pill" data-filter="yellow" onclick="setFilter('yellow')">Warm</div>
+          <div class="filter-pill" data-filter="red" onclick="setFilter('red')">Kalt</div>
+        </div>
+      </div>
+      <div class="contacts-grid" id="contacts-grid"></div>
+    </div>
+  </div>
+
+  <!-- FOCUS MODE -->
+  <div class="view" id="view-focus">
+    <div class="page-header">
+      <h1>Fokusmodus</h1>
+      <button class="btn btn-secondary btn-sm" onclick="stopFocus()" id="focus-stop-btn" style="display:none">Beenden</button>
+    </div>
+    <div class="page-content" id="focus-content"></div>
+  </div>
+
+  <!-- NETWORK -->
+  <div class="view" id="view-network">
+    <div class="page-header">
+      <h1>Netzwerk</h1>
+      <button class="btn btn-secondary btn-sm" onclick="resetNetwork()">Zurücksetzen</button>
+    </div>
+    <div class="page-content">
+      <div class="network-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--safe-green)"></div> Heiß</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--fg-orange)"></div> Warm</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--warn-red)"></div> Kalt</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gray-300)"></div> Verbindung</div>
+      </div>
+      <canvas id="network-canvas" height="560"></canvas>
+    </div>
+  </div>
+
+</main>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="contact-modal">
+  <div class="modal">
+    <div class="modal-top-bar"></div>
+    <div class="modal-header">
+      <h2 id="modal-title">Neuer Kontakt</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="contact-id">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="f-name" placeholder="Vor- und Nachname">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefon</label>
+          <input type="tel" id="f-phone" placeholder="+49 ...">
+        </div>
+        <div class="form-group">
+          <label>Letztes Treffen</label>
+          <input type="date" id="f-lastSeen">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Adresse</label>
+        <input type="text" id="f-address" placeholder="Straße, PLZ Ort">
+      </div>
+      <div class="form-group">
+        <label>Kategorie</label>
+        <select id="f-category">
+          <option value="">— Wählen —</option>
+          <option value="schule">Schule / Ausbildung / Studium</option>
+          <option value="arbeit">Früherer Arbeitsplatz</option>
+          <option value="partner">Partner / Kinder</option>
+          <option value="verwandte">Verwandte</option>
+          <option value="nachbar">Nachbarschaft</option>
+          <option value="sport">Sport / Hobby</option>
+          <option value="urlaub">Urlaub</option>
+          <option value="wohnung">Haus / Wohnung</option>
+          <option value="verein">Verein / Verband / Gemeinde</option>
+          <option value="events">Gesellschaftliche Ereignisse</option>
+          <option value="dienstleister">Dienstleister / Geschäfte</option>
+          <option value="sonstige">Sonstige</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Woher kennt ihr euch?</label>
+        <input type="text" id="f-context" placeholder="z.B. Fußballverein, Nachbar, über Lisa...">
+      </div>
+      <div class="form-group">
+        <label>Priorität</label>
+        <div class="priority-select">
+          <div class="priority-option green" onclick="selectPriority('green')">Heiß</div>
+          <div class="priority-option yellow" onclick="selectPriority('yellow')">Warm</div>
+          <div class="priority-option red" onclick="selectPriority('red')">Kalt</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Anruf-Status</label>
+        <select id="f-callStatus">
+          <option value="offen">Noch offen</option>
+          <option value="angerufen">Angerufen</option>
+          <option value="termin">Termin gemacht</option>
+          <option value="kein_interesse">Kein Interesse</option>
+          <option value="nachfassen">Nachfassen</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Nächste Aktion</label>
+        <input type="text" id="f-nextAction" placeholder="z.B. Anrufen wegen Termin">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Aktion bis</label>
+          <input type="date" id="f-nextDate">
+        </div>
+        <div class="form-group"><label>&nbsp;</label></div>
+      </div>
+      <div class="form-group">
+        <label>Notizen</label>
+        <textarea id="f-notes" placeholder="Freitext..."></textarea>
+      </div>
+      <div class="form-group link-section">
+        <label>Verknüpfte Kontakte</label>
+        <div class="link-list" id="link-list"></div>
+        <div class="link-add">
+          <select id="link-select"><option value="">Kontakt wählen...</option></select>
+          <button class="btn btn-secondary btn-sm" onclick="addLink()">Verknüpfen</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveContact()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>const SEED_CONTACTS = [{"id": "imp0004", "name": "A-Z News per SMS", "phone": "227-700", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0005", "name": "A. B.", "phone": "+4915207523094", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0006", "name": "ADAC Pannenhilfe", "phone": "+49172222222", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0007", "name": "ADAC-Pannennotruf", "phone": "+49177222222", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0008", "name": "ADAC-Stauinfo", "phone": "+4917722499", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0009", "name": "Adnan", "phone": "+491732640004", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0010", "name": "Aki", "phone": "+491714061577", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0011", "name": "Alex", "phone": "016-230-18368", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0012", "name": "Alex Handy", "phone": "017-664-378039", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0013", "name": "Alex2", "phone": "071-524-01117", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0014", "name": "Ali", "phone": "071-529-073630", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0015", "name": "Alice", "phone": "017-431-71825", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0016", "name": "Alice Neu", "phone": "+491735400589", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0017", "name": "Amazon", "phone": "+4917624596464", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0018", "name": "Andere D", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0019", "name": "Andi Avt", "phone": "017-420-10581", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0020", "name": "Andre", "phone": "017-319-47678", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0021", "name": "Andre Hotel", "phone": "016-230-24553", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0022", "name": "Andre wich", "phone": "015-115-248560", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0023", "name": "Andrer Geisel", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0024", "name": "android.support@gameloft.com", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0025", "name": "Annlie", "phone": "+4917628658921", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0026", "name": "Antonio", "phone": "+491625158218", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0027", "name": "Anzeige", "phone": "491-708-478224", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0028", "name": "Apotheken-Finder", "phone": "22833", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0029", "name": "Armin", "phone": "+4915204824419", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0030", "name": "arzt", "phone": "071-562-4108", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0031", "name": "Astra", "phone": "015-201-955997", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0032", "name": "Astrologie Live", "phone": "22464", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0033", "name": "AudioBook", "phone": "017-222-3322", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0034", "name": "Auskunft 11 88 0", "phone": "11880", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0035", "name": "Auskunft 2288", "phone": "+491722288", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0036", "name": "Auslandsauskunft", "phone": "11890", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0037", "name": "Auto", "phone": "+4915155509040", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0038", "name": "B", "phone": "+4915730703884", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0039", "name": "B.P", "phone": "+491743046475", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0040", "name": "B97", "phone": "017-396-98097", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0041", "name": "Basti", "phone": "017-262-78147", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0042", "name": "Bastie Neu", "phone": "+4915143206458", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0043", "name": "Bastie Schule", "phone": "017-479-94233", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0044", "name": "Been", "phone": "017-015-04148", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0045", "name": "Bene", "phone": "015-258-520591", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0046", "name": "Beni", "phone": "+4915122370818", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0047", "name": "Benjamin", "phone": "015-771-908811", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0048", "name": "Bernd", "phone": "+4915737996891", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0049", "name": "Biorhythmus", "phone": "+4917712051", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0050", "name": "Birgit/1", "phone": "017-445-17717", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0051", "name": "Bobi Lgi", "phone": "016-225-94547", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0052", "name": "Borat", "phone": "+4917632813169", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0053", "name": "Breuninger", "phone": "017-232-05925", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0054", "name": "Brimi Handy", "phone": "017-467-09971", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0055", "name": "Bro Deniz 😘", "phone": "+491796936844", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0056", "name": "Börsen-Info", "phone": "+4917712030", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0057", "name": "CallYa-Team", "phone": "+4917222911", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0058", "name": "Carmen", "phone": "+491628765328", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0059", "name": "Carmen", "phone": "+4915755025248", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0060", "name": "Caro Steg", "phone": "+491723536102", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0061", "name": "Chris", "phone": "015-224-129330", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0062", "name": "Chris Handy", "phone": "017-418-22197", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0063", "name": "Chris Schneider", "phone": "+4916096781165", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0064", "name": "Ck Motorrad", "phone": "015-257-433169", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0065", "name": "Claus Böttger", "phone": "+4915221603925", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0066", "name": "Curth", "phone": "015-154-643487", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0067", "name": "Dad", "phone": "+4915786033333", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0068", "name": "Dad", "phone": "+491634037948", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0069", "name": "Dani.E", "phone": "+491743091749", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0070", "name": "Daniel", "phone": "016-369-33725", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0071", "name": "Daniel 2", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0072", "name": "daniel benz", "phone": "015-773-187992", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0073", "name": "Daniel Bratfisch", "phone": "+491743204316", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0074", "name": "Davide", "phone": "+4915223294739", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0075", "name": "Debika", "phone": "+4917696473481", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0076", "name": "Def-Shop", "phone": "+4915792351710", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0077", "name": "Degra", "phone": "071-148-939960", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0078", "name": "Denis", "phone": "+4915731556807", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0079", "name": "Dennis", "phone": "+491602379674", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0080", "name": "Dennis Motorrad Speer", "phone": "+497121959320", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0081", "name": "Dennis Re. Home", "phone": "071-523-59513", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0082", "name": "Dimi", "phone": "+4915234147233", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0083", "name": "Dome", "phone": "+4917641768126", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0084", "name": "Dominik", "phone": "015-234-226333", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0085", "name": "Dominik Avt", "phone": "017-656-474840", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0086", "name": "Door", "phone": "017-189-20583", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0087", "name": "Door2", "phone": "016-365-99765", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0088", "name": "Eigene Rufnummer", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0089", "name": "Eiman", "phone": "017-497-12820", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0090", "name": "Engin", "phone": "+491748928185", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0091", "name": "Eric", "phone": "017-647-384125", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0092", "name": "Ewald", "phone": "+4917632051313", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0093", "name": "F", "phone": "071-523-32127", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0094", "name": "Fabi Sheila", "phone": "+4915738760232", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0095", "name": "fabi1989@gmx.de", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0096", "name": "Fabian Reiner", "phone": "+49 152 55915730", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0097", "name": "Fabio Barber", "phone": "+4917672781063", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0098", "name": "fahrschule", "phone": "017-171-01180", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0099", "name": "Fee", "phone": "+4917656736655", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0100", "name": "Feli 2", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0101", "name": "Felix", "phone": "+4916093813929", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0102", "name": "Fitness", "phone": "+4915256984532", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0103", "name": "Flo", "phone": "017-665-692458", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0104", "name": "Flo Games", "phone": "+491628301461", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0105", "name": "Flo Lager", "phone": "+491718950034", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0106", "name": "Florian", "phone": "017-670-809650", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0107", "name": "fragenpool@microstep-it.de", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0108", "name": "frank", "phone": "015-229-490664", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0109", "name": "Franziska Büschelberger", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0110", "name": "Freddy", "phone": "017-661-680693", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0111", "name": "Freddy Neu", "phone": "+491728353986", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0112", "name": "Freizeichentöne", "phone": "+4917222580", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0113", "name": "FunnyMailbox", "phone": "223-022", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0114", "name": "FYVE Selfservice", "phone": "22922", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0115", "name": "Geil", "phone": "015-145-727520", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0116", "name": "Gent", "phone": "017-626-162641", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0117", "name": "GetTogether", "phone": "017-222-336", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0118", "name": "Ggg", "phone": "+4915151663540", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0119", "name": "Giftnotruf", "phone": "030-192-40", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0120", "name": "Giova", "phone": "+4915255985101", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0121", "name": "Guthaben abfragen", "phone": "100", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0122", "name": "Ha", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0123", "name": "Hallo", "phone": "+491632392810", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0124", "name": "Handtmann", "phone": "017-183-53373", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0125", "name": "Handyporto", "phone": "22122", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0126", "name": "Heiko", "phone": "070-529-35570", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0127", "name": "Heinz", "phone": "+491782959498", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0128", "name": "Heinzz", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0129", "name": "Hemminger", "phone": "+4915778834859", "address": "", "context": "Tobias", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0130", "name": "Herr DOLL", "phone": "015-112-131917", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0131", "name": "herr jos", "phone": "074-418-605216", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0132", "name": "Hi", "phone": "+4915781679353", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0133", "name": "Hmm", "phone": "+4915792348951", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0134", "name": "Hoffmann", "phone": "070-316-84910", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0135", "name": "Holger Fischer", "phone": "+4917632619171", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0136", "name": "Horoskop", "phone": "+4917712050", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0137", "name": "Hotel-Service", "phone": "+4917746835", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0138", "name": "Hä", "phone": "+491733867562", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0139", "name": "Ibo", "phone": "+491749807085", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0140", "name": "Ibo", "phone": "+491624100320", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0141", "name": "Iggi", "phone": "017-670-364598", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0142", "name": "InfoFax 121414", "phone": "017-212-1414", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0143", "name": "InfoWorld", "phone": "+4917712000", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0144", "name": "Ingoo", "phone": "015-225-452414", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0145", "name": "Iwan", "phone": "+491728804351", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0146", "name": "Ja", "phone": "+491605636696", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0147", "name": "Janni", "phone": "015-738-395283", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0148", "name": "jannik", "phone": "+491749046418", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0149", "name": "Jil Handy", "phone": "016-654-57189", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0150", "name": "Jochen Binder", "phone": "+491773763172", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0151", "name": "Jojo", "phone": "+4915124152282", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0152", "name": "Jonathan", "phone": "017-639-930677", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0153", "name": "Jugendschutz", "phone": "22988", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0154", "name": "Kadda Home", "phone": "071-524-6543", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0155", "name": "Karlheinz", "phone": "015-120-924837", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0156", "name": "Kartenlegen Tarot", "phone": "22377", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0157", "name": "Katrin", "phone": "+491735279461", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0158", "name": "Kein Plan", "phone": "017-672-538644", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0159", "name": "Kev", "phone": "+491747977717", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0160", "name": "Kevin", "phone": "017-672-253931", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0161", "name": "Kevin", "phone": "071-526-17926", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0162", "name": "Kevin A", "phone": "+491735667989", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0163", "name": "Kevin Görlitz", "phone": "+491736394988", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0164", "name": "Kevin Silberberg", "phone": "015-734-719949", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0165", "name": "KINO", "phone": "22822", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0166", "name": "Klaus", "phone": "015-206-004592", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0167", "name": "Klaus Schuster", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0168", "name": "Klaus2", "phone": "+491773132121", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0169", "name": "klaus_schuster7@web.de", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0170", "name": "KontoServer", "phone": "+4917222922", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0171", "name": "Kontostand", "phone": "100", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0172", "name": "Kp", "phone": "016-329-35010", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0173", "name": "Kp2", "phone": "017-357-67792", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0174", "name": "krutsch", "phone": "071-522-7330", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0175", "name": "Ladmann", "phone": "+4915736250437", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0176", "name": "Larri", "phone": "+491743444062", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0177", "name": "Laura Timm WordPotential", "phone": "+34680373354", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0178", "name": "Lemann", "phone": "071-523-39837", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0179", "name": "Leo", "phone": "+4915780879363", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0180", "name": "Leoni", "phone": "+4915792472449", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0181", "name": "Leonie Gehler", "phone": "004-178-6253362", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0182", "name": "Lexi", "phone": "015-207-952410", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0183", "name": "Lgi", "phone": "017-228-53399", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0184", "name": "Lgi Dispo", "phone": "070-313-060360", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0185", "name": "Liiisa", "phone": "+4915789237351", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0186", "name": "Lisa", "phone": "+491777956882", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0187", "name": "Lotto/Toto", "phone": "+4917712021", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0188", "name": "Loui", "phone": "+491772509845", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0189", "name": "lucas.jagler1974@gmail.com", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0190", "name": "Luis SSC", "phone": "+4917684569810", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0191", "name": "Maggi", "phone": "017-620-010967", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0192", "name": "Magnus", "phone": "016-268-88111", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0193", "name": "Mailbox", "phone": "+491793000333", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0194", "name": "Mailbox", "phone": "5500", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0195", "name": "Malou Neu", "phone": "+491622919630", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0196", "name": "Mama", "phone": "+491733619920", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0197", "name": "Marc R", "phone": "017-275-85319", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0198", "name": "Marco Franz", "phone": "016-092-537935", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0199", "name": "Marian", "phone": "+4915205109999", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0200", "name": "Marian", "phone": "+491743444088", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0201", "name": "Mark Bist Du", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0202", "name": "Mark Freibad", "phone": "+491754147114", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0203", "name": "Markus 2", "phone": "017-262-77762", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0204", "name": "Martin Jaeger", "phone": "+4917670392320", "address": "Kindelbergweg 14 Renningen 71272 Deutschla", "context": "Huntercoach.de", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "Du hast Martin Jaeger am 5/18/2023 getroffen.\\n\\nDu kannst den Ort und", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0205", "name": "MEDION Hotline", "phone": "1157", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0206", "name": "MEDION Konto", "phone": "1155", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0207", "name": "MEDION Mailbox", "phone": "+491779911", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0208", "name": "Mehmood", "phone": "+491777918108", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0209", "name": "Micha", "phone": "015-257-686525", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0210", "name": "Micha Butz", "phone": "+491742386615", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0211", "name": "Micha Butz Privat", "phone": "016-082-67911", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0212", "name": "Michel", "phone": "+491735606391", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0213", "name": "Michel Neu", "phone": "017-663-161324", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0214", "name": "Michel Neu", "phone": "015-226-782345", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0215", "name": "Milc", "phone": "015-255-994497", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0216", "name": "MNP-Info", "phone": "+4917710667", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0217", "name": "Momo", "phone": "+491725951689", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0218", "name": "Moritz", "phone": "+491739777733", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0219", "name": "Mugge Handy", "phone": "310-176-20953824", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0220", "name": "murat", "phone": "+491726415526", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0221", "name": "Music-News", "phone": "+4917712070", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0222", "name": "N64", "phone": "015-258-932418", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0223", "name": "Nani", "phone": "+4915222675754", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0224", "name": "Nic W", "phone": "+491737157581", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0225", "name": "Nick2", "phone": "+491622317660", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0226", "name": "Nico", "phone": "+491739782901", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0227", "name": "Nimo", "phone": "+4915222679365", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0228", "name": "Oli Hobbs", "phone": "+491702928315", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0229", "name": "Oli P", "phone": "+491733437817", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0230", "name": "Oli Schule", "phone": "+491744202399", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0231", "name": "Oulli", "phone": "017-394-41397", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0232", "name": "Pana", "phone": "+491724611514", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0233", "name": "Pana2", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0234", "name": "Pascal", "phone": "+4915252491374", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0235", "name": "Pascal Avt", "phone": "017-655-226064", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0236", "name": "Patrick Früher", "phone": "017-276-59052", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0237", "name": "Patrick Häfelin", "phone": "+4915223924816", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0238", "name": "Patrick Weis", "phone": "015-779-514729", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0239", "name": "Pawel", "phone": "015-163-330380", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0240", "name": "Peter Onkel", "phone": "+4915753418123", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0241", "name": "Petra Fahrschule", "phone": "017-789-29196", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0242", "name": "Phil", "phone": "+4915774051348", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0243", "name": "Phil Neu", "phone": "+491734250911", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0244", "name": "Pippo", "phone": "+4915229083157", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0245", "name": "Primi", "phone": "015-224-805412", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0246", "name": "Primi", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0247", "name": "Pusqule", "phone": "+4915735347095", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0248", "name": "raap denis", "phone": "016-097-046107", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0249", "name": "Rico", "phone": "+491601877955", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0250", "name": "Rico Benzinger", "phone": "+4915226938009", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0251", "name": "Robert", "phone": "+491749585837", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0252", "name": "Robert Schule", "phone": "+4915901156155", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0253", "name": "Robin", "phone": "017-071-94331", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0254", "name": "Sade", "phone": "+4915233689269", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0255", "name": "Salva Auto", "phone": "+491743816236", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0256", "name": "Salva😎", "phone": "+4917680771179", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0257", "name": "Sandra", "phone": "017-241-94549", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0258", "name": "Sarah Hofer", "phone": "016-233-15835", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0259", "name": "Sascha", "phone": "017-340-54537", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0260", "name": "Sascha Frey", "phone": "015-202-420701", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0261", "name": "Schatz ♡", "phone": "+4915255915713", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0262", "name": "Schatz ♥", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0263", "name": "Schäfer", "phone": "015-228-600402", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0264", "name": "Seba 🚗💥", "phone": "+4917624449388", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0265", "name": "Sebastian Wussow", "phone": "+491773001027", "address": "", "context": "Sebastian Wussow", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0266", "name": "Sebastiano", "phone": "+4915773535128", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0267", "name": "Selina", "phone": "+491737211287", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0268", "name": "Selina", "phone": "+4915902449128", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0269", "name": "Sex", "phone": "015-215-346819", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0270", "name": "Sheen", "phone": "004-917-43113242", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0271", "name": "sheila-h@web.de", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0272", "name": "sheila.hofer@pum.de", "phone": "", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0273", "name": "Simon Grettenberger AVT", "phone": "+491752519599", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0274", "name": "Slechi", "phone": "015-222-931315", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0275", "name": "Sonja", "phone": "015-141-839808", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0276", "name": "Sperrnotruf", "phone": "+49116116", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0277", "name": "Spetim", "phone": "+4917661997964", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0278", "name": "Sport-News", "phone": "+4917712010", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0279", "name": "Stefan", "phone": "+491743402061", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0280", "name": "Stella", "phone": "017-216-88152", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0281", "name": "Taxi-Zentralruf", "phone": "22456", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0282", "name": "Teen", "phone": "015-780-789465", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0283", "name": "Thomas Butz", "phone": "+4915779361893", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0284", "name": "Tilo2", "phone": "+491727797570", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0285", "name": "tim", "phone": "+4917684547517", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0286", "name": "Timo", "phone": "017-313-16101", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0287", "name": "timo fitness", "phone": "+491727974647", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0288", "name": "Timo Grams", "phone": "+4915771538292", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0289", "name": "Timo Neu", "phone": "+4915735347569", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0290", "name": "Timo Stamm", "phone": "+4917660977019", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0291", "name": "Tina Fee", "phone": "+4915121666229", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0292", "name": "Tina Hofer", "phone": "+491748838313", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0293", "name": "Tolga", "phone": "+491622565863", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0294", "name": "Tom Handy", "phone": "017-366-31860", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0295", "name": "Tommy", "phone": "+4917632139139", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0296", "name": "Toni", "phone": "017-680-374201", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0297", "name": "Tor Hulb", "phone": "070-319-02488", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0298", "name": "Truckstop MARK", "phone": "+491789082893", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0299", "name": "Turan", "phone": "+491727654545", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0300", "name": "Unbekannte", "phone": "017-183-53373", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0301", "name": "Uwe", "phone": "+491732069743", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0302", "name": "Vale", "phone": "+4915751739229", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0303", "name": "Vale Felix", "phone": "+4915222501893", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0304", "name": "Vane", "phone": "+491736411034", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0305", "name": "Vane Handy", "phone": "017-213-36577", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0306", "name": "Vani", "phone": "+491631864093", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0307", "name": "Vany", "phone": "+491631864093", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0308", "name": "Vic", "phone": "+4917623499263", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0309", "name": "VIP-News", "phone": "+4917712061", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0310", "name": "Volker", "phone": "+491726319970", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0311", "name": "Wer Bist Du", "phone": "+4915792376220", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0312", "name": "Wer Bist Du", "phone": "+491632380324", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0313", "name": "Wer Ist Es", "phone": "+4915236853643", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0314", "name": "Wetter", "phone": "+4917712040", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0315", "name": "wolgi", "phone": "+4917628228510", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0316", "name": "Wolle", "phone": "017-733-26397", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0317", "name": "World-News", "phone": "+4917712060", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0318", "name": "Yannick", "phone": "+4915773535042", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0319", "name": "Yannick Petto", "phone": "+491728294669", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0320", "name": "Yvonne", "phone": "+4915753418124", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0321", "name": "Zec Plus", "phone": "+4915792451673", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}, {"id": "imp0322", "name": "Zeitansage", "phone": "+4917712020", "address": "", "context": "", "lastSeen": "", "nextAction": "", "nextDate": "", "notes": "", "priority": "yellow", "links": [], "createdAt": "2025-05-21T00:00:00.000Z", "updatedAt": "2025-05-21T00:00:00.000Z"}];</script>
+<script>
+let contacts = JSON.parse(localStorage.getItem('kf_contacts') || '[]');
+if (contacts.length === 0 && typeof SEED_CONTACTS !== 'undefined') {
+  contacts = SEED_CONTACTS;
+  localStorage.setItem('kf_contacts', JSON.stringify(contacts));
+}
+let currentFilter = 'all';
+let selectedPriority = 'green';
+let editingLinks = [];
+let networkNodes = [];
+let networkAnim = null;
+let contactsPage = 0;
+const PAGE_SIZE = 30;
+
+const COLORS = {
+  green: '#86B817', yellow: '#FF6600', red: '#CC2936',
+  greenBg: '#F2F8E6', yellowBg: '#FFF3E8', redBg: '#FDEDEF'
+};
+
+const CATEGORIES = {
+  schule: 'Schule / Ausbildung',
+  arbeit: 'Arbeitsplatz',
+  partner: 'Partner / Kinder',
+  verwandte: 'Verwandte',
+  nachbar: 'Nachbarschaft',
+  sport: 'Sport / Hobby',
+  urlaub: 'Urlaub',
+  wohnung: 'Haus / Wohnung',
+  verein: 'Verein / Verband',
+  events: 'Events',
+  dienstleister: 'Dienstleister',
+  sonstige: 'Sonstige'
+};
+
+const CALL_STATUS = {
+  offen: { label: 'Noch offen', color: 'var(--gray-500)', bg: 'var(--gray-100)' },
+  angerufen: { label: 'Angerufen', color: 'var(--fg-blue)', bg: 'var(--fg-blue-light)' },
+  termin: { label: 'Termin gemacht', color: 'var(--safe-green)', bg: 'var(--safe-green-bg)' },
+  kein_interesse: { label: 'Kein Interesse', color: 'var(--warn-red)', bg: 'var(--warn-red-bg)' },
+  nachfassen: { label: 'Nachfassen', color: 'var(--fg-orange)', bg: 'var(--fg-orange-light)' }
+};
+
+function save() { localStorage.setItem('kf_contacts', JSON.stringify(contacts)); }
+
+function goContacts(filter) {
+  switchView('contacts');
+  setFilter(filter);
+}
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function daysAgo(d) {
+  if (!d) return null;
+  return Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
+}
+
+function priorityLabel(p) { return p === 'green' ? 'Heiß' : p === 'yellow' ? 'Warm' : 'Kalt'; }
+function priorityColor(p) { return COLORS[p]; }
+function priorityBg(p) { return COLORS[p + 'Bg']; }
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// ===== VIEWS =====
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-items li').forEach(li => {
+    li.classList.toggle('active', li.dataset.view === name);
+  });
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'contacts') renderContacts();
+  if (name === 'focus') renderFocusStart();
+  if (name === 'network') initNetwork();
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const green = contacts.filter(c => c.priority === 'green').length;
+  const yellow = contacts.filter(c => c.priority === 'yellow').length;
+  const red = contacts.filter(c => c.priority === 'red').length;
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card total" onclick="goContacts('all')"><div class="stat-icon">👥</div><div class="stat-number">${contacts.length}</div><div class="stat-label">Gesamt</div></div>
+    <div class="stat-card green" onclick="goContacts('green')"><div class="stat-icon">🔥</div><div class="stat-number">${green}</div><div class="stat-label">Heiße Kontakte</div></div>
+    <div class="stat-card yellow" onclick="goContacts('yellow')"><div class="stat-icon">🟠</div><div class="stat-number">${yellow}</div><div class="stat-label">Warme Kontakte</div></div>
+    <div class="stat-card red" onclick="goContacts('red')"><div class="stat-icon">❄️</div><div class="stat-number">${red}</div><div class="stat-label">Kalte Kontakte</div></div>
+  `;
+
+  const upcoming = contacts.filter(c => c.nextAction).sort((a, b) => (a.nextDate || '9') < (b.nextDate || '9') ? -1 : 1).slice(0, 6);
+  const todayEl = document.getElementById('today-list');
+  if (upcoming.length === 0) {
+    todayEl.innerHTML = '<div class="empty-state"><p>Keine anstehenden Aktionen</p></div>';
+  } else {
+    todayEl.innerHTML = upcoming.map(c => `
+      <div class="today-item" onclick="openDetail('${c.id}')">
+        <div class="priority-dot" style="background:${priorityColor(c.priority)}"></div>
+        <div class="ti-info">
+          <div class="ti-name">${esc(c.name)}</div>
+          <div class="ti-context">${esc(c.nextAction)}</div>
+        </div>
+        <div class="ti-action">${c.nextDate ? formatDate(c.nextDate) : 'Offen'}</div>
+      </div>
+    `).join('');
+  }
+
+  const sorted = [...contacts].sort((a, b) => (b.updatedAt || b.createdAt) > (a.updatedAt || a.createdAt) ? 1 : -1).slice(0, 5);
+  const actEl = document.getElementById('activity-list');
+  if (sorted.length === 0) {
+    actEl.innerHTML = '<div class="empty-state"><p>Noch keine Kontakte angelegt</p></div>';
+  } else {
+    actEl.innerHTML = sorted.map(c => {
+      const days = daysAgo(c.updatedAt || c.createdAt);
+      const timeStr = days === 0 ? 'Heute' : days === 1 ? 'Gestern' : `Vor ${days} Tagen`;
+      return `<div class="activity-item"><div class="activity-dot" style="background:${priorityColor(c.priority)}"></div><div><div class="activity-text"><strong>${esc(c.name)}</strong> — ${c.updatedAt && c.updatedAt !== c.createdAt ? 'aktualisiert' : 'hinzugefügt'}</div><div class="activity-time">${timeStr}</div></div></div>`;
+    }).join('');
+  }
+  renderSidebarStats();
+}
+
+function renderSidebarStats() {
+  const el = document.getElementById('sidebar-stats');
+  const withAction = contacts.filter(c => c.nextAction).length;
+  const linked = contacts.filter(c => c.links && c.links.length > 0).length;
+  el.innerHTML = `
+    <div class="stat-row"><span>Kontakte</span><span>${contacts.length}</span></div>
+    <div class="stat-row"><span>Offene Aktionen</span><span>${withAction}</span></div>
+    <div class="stat-row"><span>Verknüpft</span><span>${linked}</span></div>
+  `;
+}
+
+// ===== CONTACTS =====
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(p => {
+    p.classList.remove('active', 'active-green', 'active-yellow', 'active-red');
+    if (p.dataset.filter === f) {
+      if (f === 'green') p.classList.add('active-green');
+      else if (f === 'yellow') p.classList.add('active-yellow');
+      else if (f === 'red') p.classList.add('active-red');
+      else p.classList.add('active');
+    }
+  });
+  renderContacts();
+}
+
+function renderContacts(resetPage) {
+  if (resetPage !== false) contactsPage = 0;
+  const q = (document.getElementById('search-input').value || '').toLowerCase();
+  let list = contacts;
+  if (currentFilter !== 'all') list = list.filter(c => c.priority === currentFilter);
+  if (q) list = list.filter(c => c.name.toLowerCase().includes(q) || (c.context || '').toLowerCase().includes(q) || (c.address || '').toLowerCase().includes(q) || (c.phone || '').includes(q));
+
+  const grid = document.getElementById('contacts-grid');
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <h3>${contacts.length === 0 ? 'Noch keine Kontakte' : 'Keine Treffer'}</h3>
+      <p>${contacts.length === 0 ? 'Lege deinen ersten Kontakt an!' : 'Versuch einen anderen Suchbegriff.'}</p>
+      ${contacts.length === 0 ? '<button class="btn btn-primary" onclick="openAddModal()">Neuer Kontakt</button>' : ''}
+    </div>`;
+    return;
+  }
+
+  const shown = list.slice(0, (contactsPage + 1) * PAGE_SIZE);
+  const hasMore = shown.length < list.length;
+
+  grid.innerHTML = shown.map(c => {
+    const linkedNames = (c.links || []).map(id => {
+      const lc = contacts.find(x => x.id === id);
+      return lc ? `<span class="cc-link-badge">${esc(lc.name)}</span>` : '';
+    }).join('');
+    return `
+    <div class="contact-card p-${c.priority}" onclick="openDetail('${c.id}')">
+      <div class="cc-header">
+        <div class="cc-name">${esc(c.name)}</div>
+        <span class="cc-priority ${c.priority}">${priorityLabel(c.priority)}</span>
+      </div>
+      <div class="cc-details">
+        ${c.phone ? `<div class="cc-detail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>${esc(c.phone)}</div>` : ''}
+        ${c.category ? `<div class="cc-detail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 002-2V8a2 2 0 00-2-2h-7.93a2 2 0 01-1.66-.9l-.82-1.2A2 2 0 007.93 3H4a2 2 0 00-2 2v13a2 2 0 002 2z"/></svg>${esc(CATEGORIES[c.category]||c.category)}</div>` : ''}
+        ${c.context ? `<div class="cc-detail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${esc(c.context)}</div>` : ''}
+        ${c.nextAction ? `<div class="cc-detail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>${esc(c.nextAction)}</div>` : ''}
+      </div>
+      ${linkedNames ? `<div class="cc-links">${linkedNames}</div>` : ''}
+      <div class="cc-footer">
+        <span class="cc-last-seen">Gesehen: ${c.lastSeen ? formatDate(c.lastSeen) : '—'}</span>
+        ${c.callStatus && c.callStatus !== 'offen' ? `<span class="cc-call-status" style="background:${CALL_STATUS[c.callStatus].bg};color:${CALL_STATUS[c.callStatus].color}">${CALL_STATUS[c.callStatus].label}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('') + (hasMore ? `
+    <div style="grid-column:1/-1;text-align:center;padding:16px">
+      <span style="font-size:.84rem;color:var(--gray-500);margin-right:12px">${shown.length} von ${list.length} Kontakten</span>
+      <button class="btn btn-secondary btn-sm" onclick="contactsPage++;renderContacts(false)">Mehr laden</button>
+    </div>` : `
+    <div style="grid-column:1/-1;text-align:center;padding:8px">
+      <span style="font-size:.82rem;color:var(--gray-500)">${list.length} Kontakte</span>
+    </div>`);
+}
+
+// ===== MODAL =====
+function openAddModal(id) {
+  document.getElementById('contact-modal').classList.add('open');
+  document.getElementById('modal-title').textContent = id ? 'Kontakt bearbeiten' : 'Neuer Kontakt';
+
+  if (id) {
+    const c = contacts.find(x => x.id === id);
+    document.getElementById('contact-id').value = c.id;
+    document.getElementById('f-name').value = c.name;
+    document.getElementById('f-phone').value = c.phone || '';
+    document.getElementById('f-address').value = c.address || '';
+    document.getElementById('f-category').value = c.category || '';
+    document.getElementById('f-context').value = c.context || '';
+    document.getElementById('f-lastSeen').value = c.lastSeen || '';
+    document.getElementById('f-callStatus').value = c.callStatus || 'offen';
+    document.getElementById('f-nextAction').value = c.nextAction || '';
+    document.getElementById('f-nextDate').value = c.nextDate || '';
+    document.getElementById('f-notes').value = c.notes || '';
+    selectedPriority = c.priority;
+    editingLinks = [...(c.links || [])];
+  } else {
+    document.getElementById('contact-id').value = '';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-phone').value = '';
+    document.getElementById('f-address').value = '';
+    document.getElementById('f-category').value = '';
+    document.getElementById('f-context').value = '';
+    document.getElementById('f-lastSeen').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('f-callStatus').value = 'offen';
+    document.getElementById('f-nextAction').value = '';
+    document.getElementById('f-nextDate').value = '';
+    document.getElementById('f-notes').value = '';
+    selectedPriority = 'green';
+    editingLinks = [];
+  }
+  updatePriorityUI();
+  renderLinkList();
+  populateLinkSelect(id);
+  document.getElementById('f-name').focus();
+}
+
+function closeModal() { document.getElementById('contact-modal').classList.remove('open'); }
+
+function selectPriority(p) { selectedPriority = p; updatePriorityUI(); }
+
+function updatePriorityUI() {
+  document.querySelectorAll('.priority-option').forEach(el => {
+    el.classList.toggle('selected', el.classList.contains(selectedPriority));
+  });
+}
+
+function populateLinkSelect(excludeId) {
+  const sel = document.getElementById('link-select');
+  sel.innerHTML = '<option value="">Kontakt wählen...</option>';
+  contacts.filter(c => c.id !== excludeId && !editingLinks.includes(c.id))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(c => { sel.innerHTML += `<option value="${c.id}">${esc(c.name)}</option>`; });
+}
+
+function renderLinkList() {
+  document.getElementById('link-list').innerHTML = editingLinks.map(id => {
+    const c = contacts.find(x => x.id === id);
+    return c ? `<div class="link-tag">${esc(c.name)}<span class="remove-link" onclick="removeLink('${id}')">&times;</span></div>` : '';
+  }).join('');
+}
+
+function addLink() {
+  const sel = document.getElementById('link-select');
+  if (!sel.value) return;
+  editingLinks.push(sel.value);
+  renderLinkList();
+  populateLinkSelect(document.getElementById('contact-id').value);
+}
+
+function removeLink(id) {
+  editingLinks = editingLinks.filter(x => x !== id);
+  renderLinkList();
+  populateLinkSelect(document.getElementById('contact-id').value);
+}
+
+function saveContact() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('Bitte Namen eingeben'); return; }
+
+  const id = document.getElementById('contact-id').value;
+  const now = new Date().toISOString();
+  const data = {
+    name,
+    phone: document.getElementById('f-phone').value.trim(),
+    address: document.getElementById('f-address').value.trim(),
+    category: document.getElementById('f-category').value,
+    context: document.getElementById('f-context').value.trim(),
+    lastSeen: document.getElementById('f-lastSeen').value,
+    callStatus: document.getElementById('f-callStatus').value,
+    nextAction: document.getElementById('f-nextAction').value.trim(),
+    nextDate: document.getElementById('f-nextDate').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    priority: selectedPriority,
+    links: [...editingLinks],
+    updatedAt: now
+  };
+
+  if (id) {
+    const idx = contacts.findIndex(c => c.id === id);
+    contacts[idx] = { ...contacts[idx], ...data };
+    toast('Kontakt aktualisiert');
+  } else {
+    contacts.push({ id: genId(), ...data, createdAt: now });
+    toast('Kontakt hinzugefügt');
+  }
+
+  editingLinks.forEach(linkId => {
+    const lc = contacts.find(c => c.id === linkId);
+    if (lc) {
+      const targetId = id || contacts[contacts.length - 1].id;
+      if (!lc.links) lc.links = [];
+      if (!lc.links.includes(targetId)) lc.links.push(targetId);
+    }
+  });
+
+  save();
+  closeModal();
+  renderDashboard();
+  renderContacts();
+}
+
+function deleteContact(id) {
+  if (!confirm('Kontakt wirklich löschen?')) return;
+  contacts = contacts.filter(c => c.id !== id);
+  contacts.forEach(c => { if (c.links) c.links = c.links.filter(l => l !== id); });
+  save();
+  closeDetail();
+  renderDashboard();
+  renderContacts();
+  toast('Kontakt gelöscht');
+}
+
+// ===== DETAIL =====
+function openDetail(id) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  const linked = (c.links || []).map(lid => contacts.find(x => x.id === lid)).filter(Boolean);
+  const panel = document.getElementById('detail-panel');
+
+  panel.innerHTML = `
+    <div class="detail-top-bar"></div>
+    <div class="detail-header">
+      <div class="dh-left">
+        <h2>${esc(c.name)}</h2>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+          <span class="dh-priority" style="background:${priorityBg(c.priority)};color:${priorityColor(c.priority)}">${priorityLabel(c.priority)}</span>
+          <div class="quick-priority">
+            <div class="qp-btn ${c.priority==='green'?'active':''}" style="background:var(--safe-green);${c.priority==='green'?'box-shadow:0 0 0 3px rgba(134,184,23,.3)':''}" onclick="quickPriority('${c.id}','green')" title="Heiß">H</div>
+            <div class="qp-btn ${c.priority==='yellow'?'active':''}" style="background:var(--fg-orange);${c.priority==='yellow'?'box-shadow:0 0 0 3px rgba(255,102,0,.3)':''}" onclick="quickPriority('${c.id}','yellow')" title="Warm">W</div>
+            <div class="qp-btn ${c.priority==='red'?'active':''}" style="background:var(--warn-red);${c.priority==='red'?'box-shadow:0 0 0 3px rgba(204,41,54,.3)':''}" onclick="quickPriority('${c.id}','red')" title="Kalt">K</div>
+          </div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeDetail()">&times;</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h3>Kontaktdaten</h3>
+        <div class="detail-section-bar"></div>
+        <div class="detail-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg><div class="${c.phone ? 'df-value' : 'df-empty'}">${c.phone ? esc(c.phone) : 'Keine Nummer'}</div></div>
+        <div class="detail-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><div class="${c.address ? 'df-value' : 'df-empty'}">${c.address ? esc(c.address) : 'Keine Adresse'}</div></div>
+      </div>
+      <div class="detail-section">
+        <h3>Kontext</h3>
+        <div class="detail-section-bar"></div>
+        <div class="detail-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><div class="${c.context ? 'df-value' : 'df-empty'}">${c.context ? esc(c.context) : 'Kein Kontext'}</div></div>
+        <div class="detail-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div class="${c.lastSeen ? 'df-value' : 'df-empty'}">Letztes Treffen: ${c.lastSeen ? formatDate(c.lastSeen) : 'Unbekannt'}</div></div>
+      </div>
+      <div class="detail-section">
+        <h3>Anruf-Status</h3>
+        <div class="detail-section-bar"></div>
+        <div class="call-status-bar">
+          ${Object.entries(CALL_STATUS).map(([k,v]) => `<div class="cs-pill ${(c.callStatus||'offen')===k?'active':''}" style="${(c.callStatus||'offen')===k?'background:'+v.bg+';color:'+v.color+';border-color:'+v.color:''}" onclick="quickCallStatus('${c.id}','${k}')">${v.label}</div>`).join('')}
+        </div>
+        ${(c.callLog && c.callLog.length > 0) ? `<div class="call-log">${c.callLog.slice(-5).reverse().map(l => `<div class="call-log-item"><span style="color:${CALL_STATUS[l.status]?.color||'var(--gray-500)'}">${CALL_STATUS[l.status]?.label||l.status}</span><span class="cl-date">${formatDate(l.date)}</span></div>`).join('')}</div>` : ''}
+      </div>
+      ${c.nextAction ? `<div class="detail-section"><h3>Nächste Aktion</h3><div class="detail-section-bar"></div><div class="detail-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><div class="df-value">${esc(c.nextAction)}${c.nextDate ? ' — bis ' + formatDate(c.nextDate) : ''}</div></div></div>` : ''}
+      ${c.notes ? `<div class="detail-section"><h3>Notizen</h3><div class="detail-section-bar"></div><p style="font-size:.88rem;line-height:1.6;color:var(--gray-700)">${esc(c.notes)}</p></div>` : ''}
+      <div class="detail-section">
+        <h3>Verknüpfte Kontakte (${linked.length})</h3>
+        <div class="detail-section-bar"></div>
+        ${linked.length > 0 ? `<div class="detail-links">${linked.map(lc => `
+          <div class="detail-link-card" onclick="closeDetail();setTimeout(()=>openDetail('${lc.id}'),300)">
+            <div class="dlc-dot" style="background:${priorityColor(lc.priority)}"></div>
+            <div><div class="dlc-name">${esc(lc.name)}</div>${lc.context ? `<div class="dlc-context">${esc(lc.context)}</div>` : ''}</div>
+          </div>`).join('')}</div>` : ''}
+        <div class="quick-link-box">
+          <input class="quick-link-input" type="text" placeholder="Kontakt suchen und verknüpfen..." oninput="searchLink('${c.id}',this.value)" onfocus="searchLink('${c.id}',this.value)" id="ql-input">
+          <div class="quick-link-results" id="ql-results"></div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-actions">
+      <button class="btn btn-primary" onclick="closeDetail();openAddModal('${c.id}')">Bearbeiten</button>
+      <button class="btn btn-danger" onclick="deleteContact('${c.id}')">Löschen</button>
+    </div>
+  `;
+  document.getElementById('detail-overlay').classList.add('open');
+  document.addEventListener('click', closeQLResults);
+}
+
+function quickCallStatus(id, status) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  c.callStatus = status;
+  c.updatedAt = new Date().toISOString();
+  if (!c.callLog) c.callLog = [];
+  c.callLog.push({ status, date: new Date().toISOString().slice(0,10) });
+  save();
+  openDetail(id);
+  renderContacts(false);
+  toast(`${c.name} → ${CALL_STATUS[status].label}`);
+}
+
+function quickPriority(id, p) {
+  const c = contacts.find(x => x.id === id);
+  if (!c || c.priority === p) return;
+  c.priority = p;
+  c.updatedAt = new Date().toISOString();
+  save();
+  openDetail(id);
+  renderDashboard();
+  renderContacts(false);
+  toast(`${c.name} → ${priorityLabel(p)}`);
+}
+
+function searchLink(contactId, query) {
+  const res = document.getElementById('ql-results');
+  const c = contacts.find(x => x.id === contactId);
+  const existingLinks = c.links || [];
+  const q = query.toLowerCase().trim();
+
+  if (q.length < 1) { res.classList.remove('open'); return; }
+
+  const matches = contacts
+    .filter(x => x.id !== contactId && !existingLinks.includes(x.id))
+    .filter(x => x.name.toLowerCase().includes(q) || (x.phone || '').includes(q))
+    .slice(0, 8);
+
+  if (matches.length === 0) {
+    res.innerHTML = '<div style="padding:12px 14px;font-size:.84rem;color:var(--gray-500)">Keine Treffer</div>';
+  } else {
+    res.innerHTML = matches.map(m => `
+      <div class="qlr-item" onmousedown="quickLink('${contactId}','${m.id}')">
+        <div class="qlr-dot" style="background:${priorityColor(m.priority)}"></div>
+        <span class="qlr-name">${esc(m.name)}</span>
+        <span class="qlr-phone">${esc(m.phone || '')}</span>
+      </div>`).join('');
+  }
+  res.classList.add('open');
+}
+
+function quickLink(fromId, toId) {
+  const from = contacts.find(x => x.id === fromId);
+  const to = contacts.find(x => x.id === toId);
+  if (!from || !to) return;
+
+  if (!from.links) from.links = [];
+  if (!to.links) to.links = [];
+  if (!from.links.includes(toId)) from.links.push(toId);
+  if (!to.links.includes(fromId)) to.links.push(fromId);
+
+  from.updatedAt = new Date().toISOString();
+  to.updatedAt = new Date().toISOString();
+  save();
+  openDetail(fromId);
+  renderContacts(false);
+  toast(`${from.name} ↔ ${to.name} verknüpft`);
+}
+
+function closeQLResults(e) {
+  const res = document.getElementById('ql-results');
+  if (res && !e.target.closest('.quick-link-box')) res.classList.remove('open');
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.removeEventListener('click', closeQLResults);
+}
+
+// ===== NETWORK =====
+function initNetwork() {
+  const canvas = document.getElementById('network-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = 560;
+
+  const linkedContacts = contacts.filter(c => c.links && c.links.length > 0);
+  const linkedIds = new Set(linkedContacts.map(c => c.id));
+  linkedContacts.forEach(c => (c.links || []).forEach(lid => linkedIds.add(lid)));
+  const netContacts = contacts.filter(c => linkedIds.has(c.id));
+
+  if (netContacts.length === 0) {
+    ctx.fillStyle = '#9E9E9E';
+    ctx.font = '15px -apple-system,system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Noch keine Verknüpfungen vorhanden', canvas.width / 2, canvas.height / 2 - 10);
+    ctx.font = '12px -apple-system,system-ui,sans-serif';
+    ctx.fillText('Verknüpfe Kontakte im Detail-Panel, um dein Netzwerk zu sehen', canvas.width / 2, canvas.height / 2 + 14);
+    return;
+  }
+
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  networkNodes = netContacts.map((c, i) => {
+    const angle = (2 * Math.PI * i) / netContacts.length;
+    const r = Math.min(cx, cy) * 0.6;
+    return {
+      id: c.id,
+      x: cx + r * Math.cos(angle) + (Math.random() - .5) * 40,
+      y: cy + r * Math.sin(angle) + (Math.random() - .5) * 40,
+      vx: 0, vy: 0,
+      name: c.name, priority: c.priority, links: c.links || []
+    };
+  });
+
+  let dragging = null, mouseX = 0, mouseY = 0;
+  canvas.onmousedown = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    for (const n of networkNodes) if (Math.hypot(n.x - x, n.y - y) < 28) { dragging = n; break; }
+  };
+  canvas.onmousemove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left; mouseY = e.clientY - rect.top;
+    if (dragging) { dragging.x = mouseX; dragging.y = mouseY; dragging.vx = 0; dragging.vy = 0; }
+  };
+  canvas.onmouseup = () => { dragging = null; };
+  canvas.ondblclick = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    for (const n of networkNodes) if (Math.hypot(n.x - x, n.y - y) < 28) { openDetail(n.id); break; }
+  };
+
+  if (networkAnim) cancelAnimationFrame(networkAnim);
+
+  function simulate() {
+    for (const n of networkNodes) {
+      for (const m of networkNodes) {
+        if (n === m) continue;
+        const dx = n.x - m.x, dy = n.y - m.y;
+        const dist = Math.max(Math.hypot(dx, dy), 1);
+        const f = 3000 / (dist * dist);
+        n.vx += (dx / dist) * f; n.vy += (dy / dist) * f;
+      }
+      for (const lid of n.links) {
+        const m = networkNodes.find(x => x.id === lid);
+        if (!m) continue;
+        n.vx += (m.x - n.x) * .005; n.vy += (m.y - n.y) * .005;
+      }
+      n.vx += (cx - n.x) * .001; n.vy += (cy - n.y) * .001;
+    }
+
+    for (const n of networkNodes) {
+      if (n === dragging) continue;
+      n.vx *= .85; n.vy *= .85;
+      n.x += n.vx; n.y += n.vy;
+      n.x = Math.max(40, Math.min(canvas.width - 40, n.x));
+      n.y = Math.max(40, Math.min(canvas.height - 40, n.y));
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (const n of networkNodes) {
+      for (const lid of n.links) {
+        const m = networkNodes.find(x => x.id === lid);
+        if (!m) continue;
+        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y);
+        ctx.strokeStyle = 'rgba(224,224,224,.6)'; ctx.lineWidth = 2; ctx.stroke();
+      }
+    }
+
+    let hovered = null;
+    for (const n of networkNodes) if (Math.hypot(n.x - mouseX, n.y - mouseY) < 28) hovered = n;
+
+    for (const n of networkNodes) {
+      const col = priorityColor(n.priority);
+      const isHov = n === hovered;
+      const r = isHov ? 26 : 22;
+
+      ctx.beginPath(); ctx.arc(n.x, n.y, r + 4, 0, Math.PI * 2);
+      ctx.fillStyle = col + '20'; ctx.fill();
+
+      ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = col; ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.font = `${isHov ? '600 13' : '600 11'}px -apple-system,system-ui,sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(n.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(), n.x, n.y);
+
+      ctx.fillStyle = isHov ? '#212121' : '#616161';
+      ctx.font = `${isHov ? '600 13' : '12'}px -apple-system,system-ui,sans-serif`;
+      ctx.textBaseline = 'top';
+      ctx.fillText(n.name, n.x, n.y + r + 8);
+    }
+    networkAnim = requestAnimationFrame(simulate);
+  }
+  simulate();
+}
+
+function resetNetwork() { initNetwork(); }
+window.addEventListener('resize', () => {
+  if (document.querySelector('.nav-items li.active')?.dataset.view === 'network') initNetwork();
+});
+
+// ===== FOCUS MODE =====
+let focusTimer = null;
+let focusSeconds = 0;
+let focusContacts = [];
+let focusIndex = 0;
+let focusPriority = 'yellow';
+let focusCategory = '';
+let focusLinksTemp = [];
+let focusEdited = 0;
+
+function renderFocusStart() {
+  document.getElementById('focus-stop-btn').style.display = 'none';
+  const uncategorized = contacts.filter(c => !c.category).length;
+  document.getElementById('focus-content').innerHTML = `
+    <div class="focus-start">
+      <div class="section-header" style="justify-content:center;margin-bottom:4px">
+        <div class="section-num">F</div>
+        <span class="section-title-text">Dein tägliches 10-Minuten-Training</span>
+      </div>
+      <div class="section-accent" style="margin:6px auto 20px"></div>
+      <p>${uncategorized} Kontakte ohne Kategorie — nimm dir Zeit und ordne sie ein.</p>
+      <div class="timer-options">
+        <div class="timer-opt selected" onclick="selectTimer(10,this)"><div class="to-min">10</div><div class="to-label">Minuten</div></div>
+        <div class="timer-opt" onclick="selectTimer(15,this)"><div class="to-min">15</div><div class="to-label">Minuten</div></div>
+        <div class="timer-opt" onclick="selectTimer(20,this)"><div class="to-min">20</div><div class="to-label">Minuten</div></div>
+      </div>
+      <button class="btn btn-orange" onclick="startFocus()" style="padding:14px 40px;font-size:1rem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Fokus starten
+      </button>
+    </div>`;
+  focusSeconds = 600;
+}
+
+let selectedTimerMin = 10;
+function selectTimer(min, el) {
+  selectedTimerMin = min;
+  focusSeconds = min * 60;
+  document.querySelectorAll('.timer-opt').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function startFocus() {
+  const uncat = contacts.filter(c => !c.category);
+  const pool = uncat.length > 0 ? uncat : contacts;
+  focusContacts = [...pool].sort(() => Math.random() - .5).slice(0, 10);
+  focusIndex = 0;
+  focusEdited = 0;
+  focusSeconds = selectedTimerMin * 60;
+  document.getElementById('focus-stop-btn').style.display = '';
+
+  if (focusTimer) clearInterval(focusTimer);
+  focusTimer = setInterval(() => {
+    focusSeconds--;
+    updateTimerDisplay();
+    if (focusSeconds <= 0) stopFocus();
+  }, 1000);
+
+  renderFocusCard();
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('ftb-time');
+  if (!el) return;
+  const m = Math.floor(focusSeconds / 60);
+  const s = focusSeconds % 60;
+  el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function renderFocusCard() {
+  if (focusIndex >= focusContacts.length) { showFocusSummary(); return; }
+  const c = focusContacts[focusIndex];
+  focusPriority = c.priority || 'yellow';
+  focusCategory = c.category || '';
+  focusLinksTemp = [];
+
+  const catPills = Object.entries(CATEGORIES).map(([k,v]) =>
+    `<div class="cat-pill ${focusCategory===k?'selected':''}" onclick="focusSetCat('${k}',this)">${v}</div>`
+  ).join('');
+
+  document.getElementById('focus-content').innerHTML = `
+    <div class="focus-active">
+      <div class="focus-timer-bar">
+        <span class="ftb-progress">Kontakt ${focusIndex+1} / ${focusContacts.length}</span>
+        <span class="ftb-time" id="ftb-time">${Math.floor(focusSeconds/60)}:${(focusSeconds%60).toString().padStart(2,'0')}</span>
+      </div>
+      <div class="focus-progress"><div class="focus-progress-fill" style="width:${((focusIndex)/focusContacts.length)*100}%"></div></div>
+      <div class="focus-card">
+        <div class="fc-name">${esc(c.name)}</div>
+        <div class="fc-phone">${c.phone ? esc(c.phone) : 'Keine Nummer'}</div>
+        <div class="fc-section">
+          <div class="fc-label">Kategorie — Woher kennst du die Person?</div>
+          <div class="cat-grid">${catPills}</div>
+        </div>
+        <div class="fc-section">
+          <div class="fc-label">Priorität</div>
+          <div class="fc-priority">
+            <div class="fp-btn ${focusPriority==='green'?'sel-green':''}" onclick="focusSetPri('green')">Heiß</div>
+            <div class="fp-btn ${focusPriority==='yellow'?'sel-yellow':''}" onclick="focusSetPri('yellow')">Warm</div>
+            <div class="fp-btn ${focusPriority==='red'?'sel-red':''}" onclick="focusSetPri('red')">Kalt</div>
+          </div>
+        </div>
+        <div class="fc-section">
+          <div class="fc-label">Verknüpfen</div>
+          <div class="focus-link-area">
+            <div id="focus-links"></div>
+            <div class="quick-link-box">
+              <input class="quick-link-input" type="text" placeholder="Namen eingeben..." oninput="focusSearchLink('${c.id}',this.value)" id="focus-ql-input">
+              <div class="quick-link-results" id="focus-ql-results"></div>
+            </div>
+          </div>
+        </div>
+        <div class="focus-actions">
+          <button class="btn btn-secondary" onclick="focusSkip()">Überspringen</button>
+          <button class="btn btn-primary" onclick="focusSave()">Speichern & Weiter</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function focusSetCat(cat, el) {
+  focusCategory = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function focusSetPri(p) {
+  focusPriority = p;
+  document.querySelectorAll('.fp-btn').forEach(b => b.classList.remove('sel-green','sel-yellow','sel-red'));
+  event.target.classList.add('sel-' + p);
+}
+
+function focusSearchLink(contactId, query) {
+  const res = document.getElementById('focus-ql-results');
+  const q = query.toLowerCase().trim();
+  if (q.length < 1) { res.classList.remove('open'); return; }
+  const matches = contacts
+    .filter(x => x.id !== contactId && !focusLinksTemp.includes(x.id))
+    .filter(x => x.name.toLowerCase().includes(q))
+    .slice(0, 6);
+  res.innerHTML = matches.length === 0
+    ? '<div style="padding:10px 14px;font-size:.84rem;color:var(--gray-500)">Keine Treffer</div>'
+    : matches.map(m => `<div class="qlr-item" onmousedown="focusAddLink('${contactId}','${m.id}')"><div class="qlr-dot" style="background:${priorityColor(m.priority)}"></div><span class="qlr-name">${esc(m.name)}</span></div>`).join('');
+  res.classList.add('open');
+}
+
+function focusAddLink(fromId, toId) {
+  focusLinksTemp.push(toId);
+  const to = contacts.find(x => x.id === toId);
+  const el = document.getElementById('focus-links');
+  el.innerHTML += `<div class="link-tag">${esc(to.name)}<span class="remove-link" onclick="this.parentElement.remove();focusLinksTemp=focusLinksTemp.filter(x=>x!=='${toId}')">&times;</span></div>`;
+  document.getElementById('focus-ql-input').value = '';
+  document.getElementById('focus-ql-results').classList.remove('open');
+}
+
+function focusSave() {
+  const c = focusContacts[focusIndex];
+  c.category = focusCategory;
+  c.priority = focusPriority;
+  c.updatedAt = new Date().toISOString();
+  if (!c.links) c.links = [];
+  focusLinksTemp.forEach(lid => {
+    if (!c.links.includes(lid)) c.links.push(lid);
+    const lc = contacts.find(x => x.id === lid);
+    if (lc) { if (!lc.links) lc.links = []; if (!lc.links.includes(c.id)) lc.links.push(c.id); }
+  });
+  save();
+  focusEdited++;
+  focusIndex++;
+  renderFocusCard();
+}
+
+function focusSkip() {
+  focusIndex++;
+  renderFocusCard();
+}
+
+function stopFocus() {
+  if (focusTimer) { clearInterval(focusTimer); focusTimer = null; }
+  showFocusSummary();
+}
+
+function showFocusSummary() {
+  if (focusTimer) { clearInterval(focusTimer); focusTimer = null; }
+  document.getElementById('focus-stop-btn').style.display = 'none';
+  const green = contacts.filter(c => c.priority === 'green').length;
+  const categorized = contacts.filter(c => c.category).length;
+  const linked = contacts.filter(c => c.links && c.links.length > 0).length;
+
+  document.getElementById('focus-content').innerHTML = `
+    <div class="focus-summary">
+      <div class="section-header" style="justify-content:center;margin-bottom:4px">
+        <div class="section-num" style="background:var(--safe-green)">&#10003;</div>
+        <span class="section-title-text">Session abgeschlossen!</span>
+      </div>
+      <div class="section-accent" style="margin:6px auto 20px"></div>
+      <p style="color:var(--gray-500)">Du hast ${focusEdited} Kontakte bearbeitet.</p>
+      <div class="fs-stats">
+        <div class="fs-stat"><div class="fs-num">${categorized}</div><div class="fs-label">Kategorisiert</div></div>
+        <div class="fs-stat"><div class="fs-num">${green}</div><div class="fs-label">Heiße Leads</div></div>
+        <div class="fs-stat"><div class="fs-num">${linked}</div><div class="fs-label">Verknüpft</div></div>
+      </div>
+      <button class="btn btn-orange" onclick="renderFocusStart()" style="margin-top:16px">Neue Session starten</button>
+      <button class="btn btn-secondary" onclick="switchView('dashboard')" style="margin-top:8px">Zum Dashboard</button>
+    </div>`;
+  renderDashboard();
+}
+
+// ===== EXPORT / IMPORT =====
+function exportData() {
+  const data = {
+    version: 1,
+    exportDate: new Date().toISOString(),
+    app: 'KontaktFlow',
+    contacts: contacts
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kontaktflow-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup heruntergeladen');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      let imported;
+      if (data.contacts && Array.isArray(data.contacts)) {
+        imported = data.contacts;
+      } else if (Array.isArray(data)) {
+        imported = data;
+      } else {
+        toast('Ungueltiges Format'); return;
+      }
+      const valid = imported.filter(c => c.name && c.id);
+      if (valid.length === 0) { toast('Keine gueltigen Kontakte gefunden'); return; }
+      const merge = confirm(`${valid.length} Kontakte gefunden.\n\nOK = Zusammenfuehren (bestehende behalten)\nAbbrechen = Alles ersetzen`);
+      if (merge) {
+        const existingIds = new Set(contacts.map(c => c.id));
+        let added = 0;
+        valid.forEach(c => {
+          if (!existingIds.has(c.id)) {
+            contacts.push(c);
+            added++;
+          } else {
+            const idx = contacts.findIndex(x => x.id === c.id);
+            if (idx >= 0 && c.updatedAt > (contacts[idx].updatedAt || '')) {
+              contacts[idx] = c;
+              added++;
+            }
+          }
+        });
+        toast(`${added} Kontakte aktualisiert/hinzugefuegt`);
+      } else {
+        contacts = valid;
+        toast(`${valid.length} Kontakte importiert`);
+      }
+      save();
+      renderDashboard();
+      renderContacts();
+    } catch (err) {
+      toast('Fehler beim Import: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+renderDashboard();
+</script>
+</body>
+</html>
