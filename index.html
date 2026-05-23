@@ -1539,6 +1539,8 @@ function importData(event) {
 }
 
 // ===== PIN AUTH =====
+const PIN_HASH = 'fba3563aed99cc02999ddc62fc1038a2c506f510d6c110aba900f70976b29640';
+
 async function hashPin(pin) {
   const data = new TextEncoder().encode(pin + 'KontaktFlow_Salt_2024');
   const hash = await crypto.subtle.digest('SHA-256', data);
@@ -1546,83 +1548,39 @@ async function hashPin(pin) {
 }
 
 function renderLogin() {
-  const stored = localStorage.getItem('kf_pin_hash');
-  const content = document.getElementById('login-content');
-
-  if (!stored) {
-    content.innerHTML = `
-      <p class="login-subtitle">Erstelle eine 4-stellige PIN um deine Daten zu schuetzen.</p>
-      <div class="pin-input-group">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric" autofocus>
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-      </div>
-      <div class="login-error" id="login-error"></div>
-      <button class="btn btn-primary" onclick="setupPin()" style="width:100%">PIN festlegen</button>
-    `;
-  } else {
-    content.innerHTML = `
-      <p class="login-subtitle">Gib deine 4-stellige PIN ein.</p>
-      <div class="pin-input-group">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric" autofocus>
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-      </div>
-      <div class="login-error" id="login-error"></div>
-      <button class="btn btn-primary" onclick="checkPin()" style="width:100%">Entsperren</button>
-    `;
-  }
-  setupPinInputs();
-}
-
-function setupPinInputs() {
+  document.getElementById('login-content').innerHTML = `
+    <p class="login-subtitle">Gib deine 4-stellige PIN ein.</p>
+    <div class="pin-input-group">
+      <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric" autofocus>
+      <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+      <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+      <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <button class="btn btn-primary" onclick="checkPin()" style="width:100%">Entsperren</button>
+  `;
   const inputs = document.querySelectorAll('.pin-digit');
   inputs.forEach((inp, i) => {
     inp.addEventListener('input', () => {
       inp.value = inp.value.replace(/\D/g, '');
       if (inp.value && i < inputs.length - 1) inputs[i + 1].focus();
-      if (i === inputs.length - 1 && inp.value) {
-        const stored = localStorage.getItem('kf_pin_hash');
-        if (stored) checkPin();
-      }
+      if (i === inputs.length - 1 && inp.value) checkPin();
     });
     inp.addEventListener('keydown', (e) => {
       if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i - 1].focus();
-      if (e.key === 'Enter') {
-        const stored = localStorage.getItem('kf_pin_hash');
-        if (stored) checkPin(); else setupPin();
-      }
+      if (e.key === 'Enter') checkPin();
     });
   });
   inputs[0]?.focus();
 }
 
-function getEnteredPin() {
-  return Array.from(document.querySelectorAll('.pin-digit')).map(i => i.value).join('');
-}
-
-async function setupPin() {
-  const pin = getEnteredPin();
-  if (pin.length !== 4) {
-    document.getElementById('login-error').textContent = 'Bitte 4 Ziffern eingeben';
-    document.querySelectorAll('.pin-digit').forEach(i => i.classList.add('error'));
-    setTimeout(() => document.querySelectorAll('.pin-digit').forEach(i => i.classList.remove('error')), 400);
-    return;
-  }
-  const hash = await hashPin(pin);
-  localStorage.setItem('kf_pin_hash', hash);
-  unlockApp();
-  toast('PIN wurde gesetzt');
-}
-
 async function checkPin() {
-  const pin = getEnteredPin();
+  const pin = Array.from(document.querySelectorAll('.pin-digit')).map(i => i.value).join('');
+  if (pin.length !== 4) return;
   const hash = await hashPin(pin);
-  const stored = localStorage.getItem('kf_pin_hash');
-  if (hash === stored) {
-    unlockApp();
+  if (hash === PIN_HASH) {
+    document.getElementById('login-screen').classList.add('hidden');
+    renderDashboard();
   } else {
     document.getElementById('login-error').textContent = 'Falsche PIN';
     document.querySelectorAll('.pin-digit').forEach(i => { i.classList.add('error'); i.value = ''; });
@@ -1631,11 +1589,6 @@ async function checkPin() {
       document.querySelector('.pin-digit')?.focus();
     }, 400);
   }
-}
-
-function unlockApp() {
-  document.getElementById('login-screen').classList.add('hidden');
-  renderDashboard();
 }
 
 // ===== SERVICE WORKER =====
