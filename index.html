@@ -437,6 +437,10 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
       Import
     </button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="btn-data" onclick="openPinChange()" title="PIN aendern">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      PIN
+    </button>
   </div>
   <div class="sidebar-footer">FLOWGATE AI</div>
 </nav>
@@ -681,7 +685,70 @@ const CALL_STATUS = {
   nachfassen: { label: 'Nachfassen', color: 'var(--fg-orange)', bg: 'var(--fg-orange-light)' }
 };
 
-function save() { localStorage.setItem('kf_contacts', JSON.stringify(contacts)); }
+// ===== FIREBASE SYNC =====
+const PIN_HASH = 'fba3563aed99cc02999ddc62fc1038a2c506f510d6c110aba900f70976b29640';
+const FB_URL = 'https://kontaktflow-479a0-default-rtdb.europe-west1.firebasedatabase.app';
+const FB_PATH = '/users/' + PIN_HASH;
+let syncInProgress = false;
+
+function save() {
+  localStorage.setItem('kf_contacts', JSON.stringify(contacts));
+  cloudSave();
+}
+
+function cloudSave() {
+  if (syncInProgress) return;
+  fetch(FB_URL + FB_PATH + '/contacts.json', {
+    method: 'PUT',
+    body: JSON.stringify(contacts)
+  }).catch(() => {});
+}
+
+async function cloudLoad() {
+  try {
+    syncInProgress = true;
+    const res = await fetch(FB_URL + FB_PATH + '/contacts.json');
+    const data = await res.json();
+    if (data && Array.isArray(data) && data.length > 0) {
+      // Cloud has data — merge: take the version with latest updatedAt per contact
+      const localMap = {};
+      contacts.forEach(c => { localMap[c.id] = c; });
+      const cloudMap = {};
+      data.forEach(c => { cloudMap[c.id] = c; });
+      // Merge: for each ID, take the one with the latest updatedAt
+      const allIds = new Set([...Object.keys(localMap), ...Object.keys(cloudMap)]);
+      const merged = [];
+      allIds.forEach(id => {
+        const local = localMap[id];
+        const cloud = cloudMap[id];
+        if (!local) { merged.push(cloud); }
+        else if (!cloud) { merged.push(local); }
+        else {
+          const lt = new Date(local.updatedAt || 0).getTime();
+          const ct = new Date(cloud.updatedAt || 0).getTime();
+          merged.push(ct > lt ? cloud : local);
+        }
+      });
+      contacts = merged;
+      localStorage.setItem('kf_contacts', JSON.stringify(contacts));
+      // Push merged result back to cloud
+      fetch(FB_URL + FB_PATH + '/contacts.json', {
+        method: 'PUT',
+        body: JSON.stringify(contacts)
+      }).catch(() => {});
+    } else if (contacts.length > 0) {
+      // Cloud is empty, push local data up
+      fetch(FB_URL + FB_PATH + '/contacts.json', {
+        method: 'PUT',
+        body: JSON.stringify(contacts)
+      }).catch(() => {});
+    }
+  } catch(e) {
+    console.log('Cloud sync failed, using local data');
+  } finally {
+    syncInProgress = false;
+  }
+}
 
 function goContacts(filter) {
   switchView('contacts');
@@ -1539,8 +1606,6 @@ function importData(event) {
 }
 
 // ===== PIN AUTH =====
-const PIN_HASH = 'fba3563aed99cc02999ddc62fc1038a2c506f510d6c110aba900f70976b29640';
-
 async function hashPin(pin) {
   const data = new TextEncoder().encode(pin + 'KontaktFlow_Salt_2024');
   const hash = await crypto.subtle.digest('SHA-256', data);
@@ -1578,8 +1643,10 @@ async function checkPin() {
   const pin = Array.from(document.querySelectorAll('.pin-digit')).map(i => i.value).join('');
   if (pin.length !== 4) return;
   const hash = await hashPin(pin);
-  if (hash === PIN_HASH) {
+  const customHash = localStorage.getItem('kf_pin_custom');
+  if (hash === (customHash || PIN_HASH)) {
     document.getElementById('login-screen').classList.add('hidden');
+    await cloudLoad();
     renderDashboard();
   } else {
     document.getElementById('login-error').textContent = 'Falsche PIN';
@@ -1589,6 +1656,82 @@ async function checkPin() {
       document.querySelector('.pin-digit')?.focus();
     }, 400);
   }
+}
+
+// ===== PIN CHANGE =====
+function openPinChange() {
+  const overlay = document.getElementById('contact-modal');
+  document.getElementById('modal-title').textContent = 'PIN aendern';
+  const body = document.querySelector('.modal-body');
+  body.innerHTML = `
+    <div class="form-group">
+      <label>Aktuelle PIN</label>
+      <div class="pin-input-group" id="pin-old" style="justify-content:flex-start">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Neue PIN</label>
+      <div class="pin-input-group" id="pin-new" style="justify-content:flex-start">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Neue PIN bestaetigen</label>
+      <div class="pin-input-group" id="pin-confirm" style="justify-content:flex-start">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+      </div>
+    </div>
+    <div class="login-error" id="pin-change-error"></div>
+  `;
+  document.querySelector('.modal-footer').innerHTML = `
+    <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
+    <button class="btn btn-primary" onclick="savePinChange()">PIN aendern</button>
+  `;
+  overlay.classList.add('open');
+  // Wire up auto-advance for all pin groups
+  ['pin-old','pin-new','pin-confirm'].forEach(gid => {
+    const inps = document.querySelectorAll('#'+gid+' .pin-digit');
+    inps.forEach((inp, i) => {
+      inp.addEventListener('input', () => {
+        inp.value = inp.value.replace(/\D/g,'');
+        if (inp.value && i < inps.length-1) inps[i+1].focus();
+      });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !inp.value && i > 0) inps[i-1].focus();
+      });
+    });
+  });
+  document.querySelector('#pin-old .pin-digit')?.focus();
+}
+
+async function savePinChange() {
+  const oldPin = Array.from(document.querySelectorAll('#pin-old .pin-digit')).map(i=>i.value).join('');
+  const newPin = Array.from(document.querySelectorAll('#pin-new .pin-digit')).map(i=>i.value).join('');
+  const confirmPin = Array.from(document.querySelectorAll('#pin-confirm .pin-digit')).map(i=>i.value).join('');
+  const errEl = document.getElementById('pin-change-error');
+
+  if (oldPin.length !== 4) { errEl.textContent = 'Aktuelle PIN eingeben'; return; }
+  if (newPin.length !== 4) { errEl.textContent = 'Neue PIN eingeben (4 Ziffern)'; return; }
+  if (newPin !== confirmPin) { errEl.textContent = 'Neue PINs stimmen nicht ueberein'; return; }
+
+  const oldHash = await hashPin(oldPin);
+  const currentHash = localStorage.getItem('kf_pin_custom') || PIN_HASH;
+  if (oldHash !== currentHash) { errEl.textContent = 'Aktuelle PIN ist falsch'; return; }
+
+  const newHash = await hashPin(newPin);
+  localStorage.setItem('kf_pin_custom', newHash);
+  closeModal();
+  toast('PIN wurde geaendert');
 }
 
 // ===== SERVICE WORKER =====
