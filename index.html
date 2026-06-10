@@ -62,6 +62,17 @@
 [data-theme="dark"] .call-status-btn{background:var(--gray-50);border-color:var(--gray-300);color:var(--gray-700)}
 [data-theme="dark"] ::-webkit-scrollbar-thumb{background:var(--gray-300)}
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#555}
+/* Dark mode Bestandskunden */
+[data-theme="dark"] .kunden-stat{background:#1E1E1E;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+[data-theme="dark"] .kunden-card{background:#1E1E1E;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+[data-theme="dark"] .kunden-card .kc-name{color:var(--fg-blue)}
+[data-theme="dark"] .kunden-card .kc-contact{color:var(--gray-400)}
+[data-theme="dark"] .ins-item{background:#262626}
+[data-theme="dark"] .ins-item:hover{background:#2a2a2a}
+[data-theme="dark"] .ins-item .ins-type{color:var(--gray-100)}
+[data-theme="dark"] .ins-item .ins-actions button:hover{background:#333}
+[data-theme="dark"] .kc-add-ins{border-color:var(--gray-500);color:var(--fg-blue)}
+[data-theme="dark"] .kc-add-ins:hover{background:rgba(0,122,203,.1);border-color:var(--fg-blue)}
 /* Dark mode toggle */
 .theme-toggle{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
 .theme-toggle:hover{background:rgba(255,255,255,.18);color:#fff}
@@ -196,6 +207,39 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .cc-link-badge{padding:3px 10px;background:var(--fg-blue-light);color:var(--fg-blue);border-radius:12px;font-size:.74rem;font-weight:500}
 .cc-footer{margin-top:12px;display:flex;justify-content:space-between;align-items:center}
 .cc-last-seen{font-size:.76rem;color:var(--gray-500)}
+
+/* ===== BESTANDSKUNDEN ===== */
+.kunden-stats{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.kunden-stat{background:var(--white);border-radius:var(--radius-sm);padding:14px 18px;box-shadow:var(--shadow);flex:1;min-width:120px;text-align:center}
+.kunden-stat .ks-num{font-size:1.5rem;font-weight:700;color:var(--fg-blue-dark)}
+.kunden-stat .ks-label{font-size:.75rem;color:var(--gray-500);margin-top:2px}
+.kunden-search{margin-bottom:18px}
+.kunden-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:14px;border-left:4px solid #FFB300;transition:all .2s}
+.kunden-card:hover{box-shadow:var(--shadow-lg)}
+.kunden-card .kc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.kunden-card .kc-name{font-weight:700;font-size:1.05rem;color:var(--fg-blue-dark);cursor:pointer}
+.kunden-card .kc-name:hover{text-decoration:underline}
+.kunden-card .kc-since{font-size:.75rem;color:var(--gray-500)}
+.kunden-card .kc-contact{font-size:.84rem;color:var(--gray-700);margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap}
+.kunden-card .kc-contact span{display:flex;align-items:center;gap:4px}
+.ins-list{display:flex;flex-direction:column;gap:8px}
+.ins-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius-sm);transition:all .15s;position:relative}
+.ins-item:hover{background:var(--fg-blue-light)}
+.ins-item .ins-icon{font-size:1.2rem;flex-shrink:0}
+.ins-item .ins-info{flex:1;min-width:0}
+.ins-item .ins-type{font-weight:600;font-size:.86rem;color:var(--gray-900)}
+.ins-item .ins-provider{font-size:.78rem;color:var(--gray-500)}
+.ins-item .ins-meta{text-align:right;flex-shrink:0}
+.ins-item .ins-premium{font-weight:600;font-size:.86rem;color:var(--safe-green)}
+.ins-item .ins-date{font-size:.72rem;color:var(--gray-500)}
+.ins-item .ins-actions{display:flex;gap:4px;margin-left:8px}
+.ins-item .ins-actions button{background:none;border:none;cursor:pointer;padding:4px;border-radius:4px;font-size:.8rem;transition:background .15s}
+.ins-item .ins-actions button:hover{background:var(--gray-100)}
+.ins-review-badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.7rem;font-weight:600;margin-left:8px}
+.ins-review-badge.due{background:var(--fg-orange-light);color:var(--fg-orange)}
+.ins-review-badge.ok{background:var(--safe-green-bg);color:var(--safe-green)}
+.kc-add-ins{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 12px;border:1px dashed var(--gray-300);border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;color:var(--fg-blue);font-weight:500;transition:all .15s;background:none}
+.kc-add-ins:hover{background:var(--fg-blue-light);border-color:var(--fg-blue)}
 
 /* ===== PIPELINE / KANBAN ===== */
 .pipeline-board{display:flex;gap:14px;padding:14px 24px 24px;overflow-x:auto;height:calc(100vh - 70px);-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
@@ -473,6 +517,27 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   .activity-item{padding:12px 6px}
   .toast{bottom:72px;right:12px;left:12px;text-align:center}
   .empty-state{padding:40px 16px}
+  /* Bestandskunden mobile */
+  .kunden-stats{gap:8px;margin-bottom:14px}
+  .kunden-stat{padding:10px 12px;min-width:80px}
+  .kunden-stat .ks-num{font-size:1.2rem}
+  .kunden-stat .ks-label{font-size:.68rem}
+  .kunden-search{margin-bottom:14px}
+  .kunden-search .search-box input{padding:12px 16px 12px 40px;font-size:.92rem}
+  .kunden-card{padding:14px 14px;margin-bottom:10px}
+  .kunden-card .kc-header{margin-bottom:8px}
+  .kunden-card .kc-name{font-size:.95rem}
+  .kunden-card .kc-contact{font-size:.78rem;gap:10px;margin-bottom:10px}
+  .ins-item{padding:8px 10px;gap:8px;flex-wrap:wrap}
+  .ins-item .ins-icon{font-size:1rem}
+  .ins-item .ins-type{font-size:.8rem}
+  .ins-item .ins-provider{font-size:.72rem}
+  .ins-item .ins-meta{text-align:left;flex-basis:100%;display:flex;gap:12px;padding-top:4px}
+  .ins-item .ins-premium{font-size:.8rem}
+  .ins-item .ins-date{font-size:.7rem}
+  .ins-item .ins-actions{margin-left:auto;margin-top:-4px}
+  .kc-add-ins{padding:10px 14px;font-size:.8rem}
+  .ins-review-badge{font-size:.66rem;padding:2px 6px}
 }
 @media(max-width:480px){
   .stats-row{grid-template-columns:1fr 1fr;gap:8px}
@@ -485,6 +550,10 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   .detail-header .dh-left h2{font-size:1.1rem}
   .cc-detail{font-size:.8rem}
   #network-canvas{height:320px}
+  .kunden-stats{flex-direction:column}
+  .kunden-stat{min-width:0}
+  .kunden-card{padding:12px}
+  .ins-item{padding:8px}
 }
 @media(max-width:380px){
   .nav-items li{font-size:.58rem;padding:8px 2px 6px}
@@ -541,6 +610,10 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
     <li data-view="pipeline" onclick="switchView('pipeline')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="17" y="5" width="6" height="16" rx="1"/></svg>
       Pipeline
+    </li>
+    <li data-view="kunden" onclick="switchView('kunden')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Kunden
     </li>
     <li data-view="network" onclick="switchView('network')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/><line x1="5" y1="19" x2="19" y2="19"/></svg>
@@ -604,6 +677,24 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
         <div class="card">
           <div class="section-header">
             <div class="section-num">2</div>
+            <span class="section-title-text">Nächste Termine</span>
+          </div>
+          <div class="section-accent"></div>
+          <div class="today-list" id="next-appointments"></div>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:18px">
+        <div class="card">
+          <div class="section-header">
+            <div class="section-num" style="background:var(--fg-orange)">⭐</div>
+            <span class="section-title-text">Bestandskunden</span>
+          </div>
+          <div class="section-accent"></div>
+          <div id="dash-kunden"></div>
+        </div>
+        <div class="card">
+          <div class="section-header">
+            <div class="section-num">3</div>
             <span class="section-title-text">Letzte Aktivitäten</span>
           </div>
           <div class="section-accent"></div>
@@ -654,6 +745,27 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
       <h1>Pipeline</h1>
     </div>
     <div class="pipeline-board" id="pipeline-board"></div>
+  </div>
+
+  <!-- BESTANDSKUNDEN -->
+  <div class="view" id="view-kunden">
+    <div class="page-header">
+      <h1>Bestandskunden</h1>
+      <button class="btn btn-primary btn-sm" onclick="openAddInsurance()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="hide-mobile-text">Versicherung</span>
+      </button>
+    </div>
+    <div class="page-content">
+      <div class="kunden-stats" id="kunden-stats"></div>
+      <div class="kunden-search">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="kunden-search" placeholder="Bestandskunde suchen..." oninput="renderKunden()">
+        </div>
+      </div>
+      <div id="kunden-list"></div>
+    </div>
   </div>
 
   <!-- NETWORK -->
@@ -785,6 +897,75 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
       <button class="btn btn-primary" onclick="saveContact()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSURANCE MODAL -->
+<div class="modal-overlay" id="insurance-modal">
+  <div class="modal">
+    <div class="modal-top-bar"></div>
+    <div class="modal-header">
+      <h2 id="ins-modal-title">Versicherung hinzufügen</h2>
+      <button class="modal-close" onclick="closeInsModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ins-id">
+      <input type="hidden" id="ins-contact-id">
+      <div class="form-group">
+        <label>Kunde</label>
+        <select id="ins-contact">
+          <option value="">— Kunde wählen —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Versicherungsart</label>
+        <select id="ins-type">
+          <option value="haftpflicht">Privathaftpflicht</option>
+          <option value="hausrat">Hausrat</option>
+          <option value="kfz">KFZ</option>
+          <option value="berufsunfaehigkeit">Berufsunfähigkeit</option>
+          <option value="leben">Lebensversicherung</option>
+          <option value="rente">Private Rente</option>
+          <option value="kranken">Krankenversicherung</option>
+          <option value="unfall">Unfallversicherung</option>
+          <option value="rechtsschutz">Rechtsschutz</option>
+          <option value="wohngebaeude">Wohngebäude</option>
+          <option value="sonstige">Sonstige</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Anbieter / Gesellschaft</label>
+        <input type="text" id="ins-provider" placeholder="z.B. Allianz, HUK, DEVK...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Abschlussdatum</label>
+          <input type="date" id="ins-date">
+        </div>
+        <div class="form-group">
+          <label>Beitrag</label>
+          <input type="text" id="ins-premium" placeholder="z.B. 25€/Monat">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Vertragsnummer</label>
+          <input type="text" id="ins-contractNr" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label>Nächste Prüfung</label>
+          <input type="date" id="ins-reviewDate">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notizen</label>
+        <textarea id="ins-notes" placeholder="Details zum Vertrag..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeInsModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveInsurance()">Speichern</button>
     </div>
   </div>
 </div>
@@ -946,7 +1127,7 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 
 // ===== SWIPE NAVIGATION (Mobile) =====
 (function() {
-  const views = ['dashboard', 'contacts', 'focus', 'pipeline', 'network'];
+  const views = ['dashboard', 'contacts', 'focus', 'pipeline', 'kunden', 'network'];
   let touchStartX = 0, touchStartY = 0, touchStartTime = 0, swiping = false;
   const main = document.querySelector('main');
   if (!main) return;
@@ -972,6 +1153,8 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 
     const active = document.querySelector('.nav-items li.active');
     const currentView = active ? active.dataset.view : 'dashboard';
+    // Don't swipe between tabs on Pipeline (horizontal scroll is for columns) or Bestandskunden
+    if (currentView === 'pipeline' || currentView === 'kunden') return;
     const idx = views.indexOf(currentView);
     if (idx === -1) return;
 
@@ -1061,6 +1244,7 @@ function switchView(name) {
   if (name === 'contacts') renderContacts();
   if (name === 'focus') renderFocusStart();
   if (name === 'pipeline') renderPipeline();
+  if (name === 'kunden') renderKunden();
   if (name === 'network') initNetwork();
 }
 
@@ -1092,6 +1276,49 @@ function renderDashboard() {
         <div class="ti-action">${c.nextDate ? formatDate(c.nextDate) : 'Offen'}</div>
       </div>
     `).join('');
+  }
+
+  // Nächste Termine (contacts with nextDate in pipeline termin/angebot or any with date)
+  const today = new Date().toISOString().slice(0,10);
+  const withDate = contacts.filter(c => c.nextDate).sort((a, b) => a.nextDate < b.nextDate ? -1 : 1).slice(0, 5);
+  const apptEl = document.getElementById('next-appointments');
+  if (withDate.length === 0) {
+    apptEl.innerHTML = '<div class="empty-state"><p>Keine Termine geplant</p></div>';
+  } else {
+    apptEl.innerHTML = withDate.map(c => {
+      const isPast = c.nextDate < today;
+      return `
+      <div class="today-item" onclick="navigateToContact('${c.id}')" style="${isPast ? 'border-left-color:var(--warn-red)' : ''}">
+        <div class="priority-dot" style="background:${priorityColor(c.priority)}"></div>
+        <div class="ti-info">
+          <div class="ti-name">${esc(c.name)}</div>
+          <div class="ti-context">${esc(c.nextAction || 'Termin')}</div>
+        </div>
+        <div class="ti-action" style="${isPast ? 'color:var(--warn-red)' : ''}">${formatDate(c.nextDate)}${isPast ? ' ⚠️' : ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Bestandskunden overview
+  const kunden = contacts.filter(c => (c.pipeline || 'offen') === 'bestandskunde');
+  const dashKundenEl = document.getElementById('dash-kunden');
+  if (kunden.length === 0) {
+    dashKundenEl.innerHTML = '<div class="empty-state"><p>Noch keine Bestandskunden</p></div>';
+  } else {
+    const allIns = kunden.reduce((acc, c) => acc.concat(c.insurances || []), []);
+    const reviewDue = allIns.filter(i => i.reviewDate && i.reviewDate <= today).length;
+    dashKundenEl.innerHTML = `
+      <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+        <div style="font-size:.85rem;color:var(--gray-700)">⭐ <strong>${kunden.length}</strong> Kunden</div>
+        <div style="font-size:.85rem;color:var(--gray-700)">📋 <strong>${allIns.length}</strong> Verträge</div>
+        ${reviewDue > 0 ? `<div style="font-size:.85rem;color:var(--fg-orange)">🔔 <strong>${reviewDue}</strong> Prüfung fällig</div>` : ''}
+      </div>
+      ${kunden.slice(0, 4).map(c => {
+        const insCount = (c.insurances || []).length;
+        return `<div class="activity-item" onclick="switchView('kunden')"><div class="activity-dot" style="background:#FFB300"></div><div><div class="activity-text"><strong>${esc(c.name)}</strong> — ${insCount} Vertrag${insCount !== 1 ? 'e' : ''}</div><div class="activity-time">${c.phone || ''}</div></div></div>`;
+      }).join('')}
+      ${kunden.length > 4 ? `<div style="text-align:center;padding:8px"><a href="#" onclick="event.preventDefault();switchView('kunden')" style="font-size:.84rem;color:var(--fg-blue);font-weight:500">Alle ${kunden.length} Bestandskunden →</a></div>` : ''}
+    `;
   }
 
   const sorted = [...contacts].sort((a, b) => (b.updatedAt || b.createdAt) > (a.updatedAt || a.createdAt) ? 1 : -1).slice(0, 5);
@@ -1480,6 +1707,174 @@ function closeQLResults(e) {
 function closeDetail() {
   document.getElementById('detail-overlay').classList.remove('open');
   document.removeEventListener('click', closeQLResults);
+}
+
+// ===== BESTANDSKUNDEN =====
+const INS_TYPES = {
+  haftpflicht: {label:'Privathaftpflicht', icon:'🛡️'},
+  hausrat: {label:'Hausrat', icon:'🏠'},
+  kfz: {label:'KFZ', icon:'🚗'},
+  berufsunfaehigkeit: {label:'Berufsunfähigkeit', icon:'💼'},
+  leben: {label:'Lebensversicherung', icon:'❤️'},
+  rente: {label:'Private Rente', icon:'🏦'},
+  kranken: {label:'Krankenversicherung', icon:'🏥'},
+  unfall: {label:'Unfallversicherung', icon:'⚡'},
+  rechtsschutz: {label:'Rechtsschutz', icon:'⚖️'},
+  wohngebaeude: {label:'Wohngebäude', icon:'🏗️'},
+  sonstige: {label:'Sonstige', icon:'📋'}
+};
+
+function renderKunden() {
+  const q = (document.getElementById('kunden-search')?.value || '').toLowerCase();
+  const kunden = contacts.filter(c => (c.pipeline || 'offen') === 'bestandskunde');
+  const filtered = q ? kunden.filter(c => c.name.toLowerCase().includes(q) || (c.phone || '').includes(q)) : kunden;
+
+  // Stats
+  const allIns = kunden.reduce((acc, c) => acc.concat(c.insurances || []), []);
+  const reviewDue = allIns.filter(i => i.reviewDate && i.reviewDate <= new Date().toISOString().slice(0,10)).length;
+  document.getElementById('kunden-stats').innerHTML = `
+    <div class="kunden-stat"><div class="ks-num">${kunden.length}</div><div class="ks-label">Bestandskunden</div></div>
+    <div class="kunden-stat"><div class="ks-num">${allIns.length}</div><div class="ks-label">Verträge</div></div>
+    <div class="kunden-stat"><div class="ks-num" style="color:${reviewDue > 0 ? 'var(--fg-orange)' : 'var(--safe-green)'}">${reviewDue}</div><div class="ks-label">Prüfung fällig</div></div>
+  `;
+
+  const listEl = document.getElementById('kunden-list');
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<div class="empty-state"><p>${kunden.length === 0 ? 'Noch keine Bestandskunden — verschiebe Kontakte in der Pipeline auf "Bestandskunde"' : 'Kein Treffer'}</p></div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(c => {
+    const ins = c.insurances || [];
+    const today = new Date().toISOString().slice(0,10);
+    return `
+    <div class="kunden-card">
+      <div class="kc-header">
+        <div class="kc-name" onclick="navigateToContact('${c.id}')">${esc(c.name)}</div>
+        <div class="kc-since">${c.createdAt ? 'Kunde seit ' + formatDate(c.createdAt.slice(0,10)) : ''}</div>
+      </div>
+      <div class="kc-contact">
+        ${c.phone ? `<span>📞 ${esc(c.phone)}</span>` : ''}
+        ${c.address ? `<span>📍 ${esc(c.address)}</span>` : ''}
+        ${c.nextAction ? `<span>→ ${esc(c.nextAction)}${c.nextDate ? ' (' + formatDate(c.nextDate) + ')' : ''}</span>` : ''}
+      </div>
+      <div class="ins-list">
+        ${ins.map((i, idx) => `
+          <div class="ins-item">
+            <div class="ins-icon">${(INS_TYPES[i.type] || INS_TYPES.sonstige).icon}</div>
+            <div class="ins-info">
+              <div class="ins-type">${(INS_TYPES[i.type] || INS_TYPES.sonstige).label}${i.reviewDate ? (i.reviewDate <= today ? '<span class="ins-review-badge due">Prüfung fällig</span>' : '<span class="ins-review-badge ok">OK</span>') : ''}</div>
+              <div class="ins-provider">${esc(i.provider || '')}${i.contractNr ? ' · Nr. ' + esc(i.contractNr) : ''}${i.date ? ' · seit ' + formatDate(i.date) : ''}</div>
+            </div>
+            <div class="ins-meta">
+              ${i.premium ? `<div class="ins-premium">${esc(i.premium)}</div>` : ''}
+            </div>
+            <div class="ins-actions">
+              <button onclick="editInsurance('${c.id}',${idx})" title="Bearbeiten">✏️</button>
+              <button onclick="deleteInsurance('${c.id}',${idx})" title="Löschen">🗑️</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <button class="kc-add-ins" onclick="openAddInsurance('${c.id}')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Versicherung hinzufügen
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function openAddInsurance(contactId) {
+  document.getElementById('insurance-modal').classList.add('open');
+  document.getElementById('ins-modal-title').textContent = 'Versicherung hinzufügen';
+  document.getElementById('ins-id').value = '';
+  document.getElementById('ins-contact-id').value = '';
+  document.getElementById('ins-type').value = 'haftpflicht';
+  document.getElementById('ins-provider').value = '';
+  document.getElementById('ins-date').value = '';
+  document.getElementById('ins-premium').value = '';
+  document.getElementById('ins-contractNr').value = '';
+  document.getElementById('ins-reviewDate').value = '';
+  document.getElementById('ins-notes').value = '';
+
+  // Populate customer dropdown
+  const sel = document.getElementById('ins-contact');
+  const kunden = contacts.filter(c => (c.pipeline || 'offen') === 'bestandskunde');
+  sel.innerHTML = '<option value="">— Kunde wählen —</option>' + kunden.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  if (contactId) sel.value = contactId;
+}
+
+function editInsurance(contactId, idx) {
+  const c = contacts.find(x => x.id === contactId);
+  if (!c || !c.insurances || !c.insurances[idx]) return;
+  const i = c.insurances[idx];
+  openAddInsurance(contactId);
+  document.getElementById('ins-modal-title').textContent = 'Versicherung bearbeiten';
+  document.getElementById('ins-id').value = idx;
+  document.getElementById('ins-contact-id').value = contactId;
+  document.getElementById('ins-type').value = i.type || 'sonstige';
+  document.getElementById('ins-provider').value = i.provider || '';
+  document.getElementById('ins-date').value = i.date || '';
+  document.getElementById('ins-premium').value = i.premium || '';
+  document.getElementById('ins-contractNr').value = i.contractNr || '';
+  document.getElementById('ins-reviewDate').value = i.reviewDate || '';
+  document.getElementById('ins-notes').value = i.notes || '';
+}
+
+function saveInsurance() {
+  const contactId = document.getElementById('ins-contact').value;
+  if (!contactId) { toast('Bitte Kunde wählen'); return; }
+  const c = contacts.find(x => x.id === contactId);
+  if (!c) return;
+
+  const insData = {
+    type: document.getElementById('ins-type').value,
+    provider: document.getElementById('ins-provider').value.trim(),
+    date: document.getElementById('ins-date').value,
+    premium: document.getElementById('ins-premium').value.trim(),
+    contractNr: document.getElementById('ins-contractNr').value.trim(),
+    reviewDate: document.getElementById('ins-reviewDate').value,
+    notes: document.getElementById('ins-notes').value.trim()
+  };
+
+  if (!c.insurances) c.insurances = [];
+  const editId = document.getElementById('ins-id').value;
+  const editContactId = document.getElementById('ins-contact-id').value;
+
+  if (editId !== '' && editContactId) {
+    // Editing existing
+    const origContact = contacts.find(x => x.id === editContactId);
+    if (origContact && origContact.insurances) {
+      if (editContactId === contactId) {
+        origContact.insurances[parseInt(editId)] = insData;
+      } else {
+        origContact.insurances.splice(parseInt(editId), 1);
+        c.insurances.push(insData);
+      }
+    }
+  } else {
+    c.insurances.push(insData);
+  }
+
+  c.updatedAt = new Date().toISOString();
+  save();
+  closeInsModal();
+  renderKunden();
+  toast('Versicherung gespeichert');
+}
+
+function deleteInsurance(contactId, idx) {
+  const c = contacts.find(x => x.id === contactId);
+  if (!c || !c.insurances) return;
+  c.insurances.splice(idx, 1);
+  c.updatedAt = new Date().toISOString();
+  save();
+  renderKunden();
+  toast('Versicherung entfernt');
+}
+
+function closeInsModal() {
+  document.getElementById('insurance-modal').classList.remove('open');
 }
 
 // ===== PIPELINE =====
