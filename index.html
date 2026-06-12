@@ -62,6 +62,15 @@
 [data-theme="dark"] .call-status-btn{background:var(--gray-50);border-color:var(--gray-300);color:var(--gray-700)}
 [data-theme="dark"] ::-webkit-scrollbar-thumb{background:var(--gray-300)}
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#555}
+/* Dark mode Pipeline Settings */
+[data-theme="dark"] .pstage-item{background:#262626}
+[data-theme="dark"] .pstage-item:hover{background:#2a2a2a}
+[data-theme="dark"] .pstage-icon-input,[data-theme="dark"] .pstage-name-input{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-100)}
+[data-theme="dark"] #new-stage-name,[data-theme="dark"] #new-stage-icon{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-100)}
+/* Dark mode Pipeline/Detail additions */
+[data-theme="dark"] .ps-pill{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-400)}
+[data-theme="dark"] .ps-pill:hover{box-shadow:0 2px 8px rgba(0,0,0,.3)}
+[data-theme="dark"] .pipeline-search .search-box input{background:var(--gray-50);border-color:var(--gray-300);color:var(--gray-900)}
 /* Dark mode Bestandskunden */
 [data-theme="dark"] .kunden-stat{background:#1E1E1E;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 [data-theme="dark"] .kunden-card{background:#1E1E1E;box-shadow:0 2px 8px rgba(0,0,0,.3)}
@@ -262,6 +271,30 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .pipeline-card .pc-cal-btn{margin-left:auto;background:none;border:none;cursor:pointer;font-size:.85rem;padding:2px 4px;border-radius:4px;transition:background .15s}
 .pipeline-card .pc-cal-btn:hover{background:var(--fg-blue-light)}
 .pipeline-card.dragging{opacity:.4}
+
+/* Pipeline Search */
+.pipeline-search{padding:0 24px 4px;display:flex;align-items:center;gap:10px}
+.pipeline-search .search-box{max-width:360px;flex:1}
+.pipeline-search .pipeline-search-count{font-size:.78rem;color:var(--gray-500);white-space:nowrap}
+
+/* Pipeline Settings */
+.pstage-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--gray-50);border-radius:var(--radius-sm);margin-bottom:6px;transition:all .15s}
+.pstage-item:hover{background:var(--fg-blue-light)}
+.pstage-grip{cursor:grab;color:var(--gray-400);font-size:1rem;padding:0 4px;user-select:none}
+.pstage-grip:active{cursor:grabbing}
+.pstage-icon-input{width:40px;border:1px solid var(--gray-200);border-radius:6px;text-align:center;font-size:1rem;padding:4px;background:var(--white)}
+.pstage-name-input{flex:1;border:1px solid var(--gray-200);border-radius:6px;padding:6px 10px;font-size:.86rem;font-family:inherit;background:var(--white)}
+.pstage-color-input{width:34px;height:34px;border:none;border-radius:6px;padding:2px;cursor:pointer;background:var(--white)}
+.pstage-delete{background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:1rem;padding:4px 6px;border-radius:6px;transition:all .15s}
+.pstage-delete:hover{color:var(--warn-red);background:var(--warn-red-bg)}
+.pstage-item.drag-over-stage{border-top:2px solid var(--fg-blue)}
+
+/* Detail Pipeline Stage Selector */
+.pipeline-stage-bar{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.ps-pill{padding:5px 10px;border-radius:16px;font-size:.74rem;font-weight:600;cursor:pointer;border:1.5px solid var(--gray-300);transition:all .15s;background:var(--white);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.ps-pill:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.ps-pill.active{border-color:currentColor;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.ps-pill .ps-icon{font-size:.8rem}
 
 /* ===== NETWORK ===== */
 #network-canvas{width:100%;border-radius:var(--radius);background:var(--white);box-shadow:var(--shadow);cursor:grab}
@@ -473,7 +506,7 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   .nav-items li.active::before{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;background:var(--fg-orange);border-radius:0 0 2px 2px}
   main{position:fixed;left:0;top:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));padding:0;-webkit-overflow-scrolling:touch}
   .page-top-accent{display:none}
-  .page-header{padding:14px 16px 0;position:sticky;top:0;background:var(--bg);z-index:50}
+  .page-header{padding:14px 16px 0;padding-top:calc(14px + env(safe-area-inset-top));position:sticky;top:0;background:var(--bg);z-index:50}
   .page-header h1{font-size:1.15rem}
   .page-header .btn{padding:7px 12px;font-size:.78rem}
   .page-header .btn svg{width:14px;height:14px}
@@ -492,7 +525,7 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   .cc-name{font-size:.95rem}
   .detail-overlay{z-index:950}
   .detail-panel{width:100vw}
-  .detail-header{padding:20px 16px}
+  .detail-header{padding:20px 16px;padding-top:calc(20px + env(safe-area-inset-top))}
   .detail-body{padding:20px 16px}
   .detail-actions{padding:20px 16px}
   .modal-overlay{padding:10px}
@@ -509,7 +542,7 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   .btn{padding:10px 18px;font-size:.84rem;-webkit-tap-highlight-color:transparent}
   .form-row{grid-template-columns:1fr}
   .form-group input,.form-group textarea,.form-group select{padding:12px 14px;font-size:.92rem}
-  .pipeline-board{padding:10px 12px 16px;gap:10px;height:calc(100vh - 120px);scroll-snap-type:x mandatory}
+  .pipeline-board{padding:10px 12px 16px;gap:10px;height:calc(100vh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom));scroll-snap-type:x mandatory}
   .pipeline-col{min-width:75vw;max-width:80vw}
   #network-canvas{height:400px}
   .network-legend{gap:14px;font-size:.78rem}
@@ -517,6 +550,15 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   .activity-item{padding:12px 6px}
   .toast{bottom:72px;right:12px;left:12px;text-align:center}
   .empty-state{padding:40px 16px}
+  /* Pipeline search mobile */
+  .pipeline-search{padding:0 12px 4px}
+  .pipeline-search .search-box{max-width:none}
+  .pipeline-search .search-box input{padding:10px 14px 10px 38px;font-size:.88rem}
+  .pipeline-search-count{font-size:.72rem}
+  /* Pipeline stage pills mobile */
+  .pipeline-stage-bar{gap:4px}
+  .ps-pill{padding:4px 8px;font-size:.68rem}
+  .ps-pill .ps-icon{font-size:.72rem}
   /* Bestandskunden mobile */
   .kunden-stats{gap:8px;margin-bottom:14px}
   .kunden-stat{padding:10px 12px;min-width:80px}
@@ -743,6 +785,17 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   <div class="view" id="view-pipeline">
     <div class="page-header">
       <h1>Pipeline</h1>
+      <button class="btn btn-secondary btn-sm" onclick="openPipelineSettings()" title="Pipeline-Stufen anpassen">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="hide-mobile-text">Stufen</span>
+      </button>
+    </div>
+    <div class="pipeline-search">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="pipeline-search" placeholder="Kontakt in Pipeline suchen..." oninput="filterPipeline()">
+      </div>
+      <span class="pipeline-search-count" id="pipeline-search-count"></span>
     </div>
     <div class="pipeline-board" id="pipeline-board"></div>
   </div>
@@ -857,15 +910,7 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
       </div>
       <div class="form-group">
         <label>Pipeline-Stufe</label>
-        <select id="f-pipeline">
-          <option value="offen">📋 Offen</option>
-          <option value="kontaktiert">📞 Kontaktiert</option>
-          <option value="interesse">🔥 Interesse</option>
-          <option value="termin">📅 Termin</option>
-          <option value="angebot">📄 Angebot</option>
-          <option value="bestandskunde">⭐ Bestandskunde</option>
-          <option value="nachfassen">🔔 Nachfassen</option>
-        </select>
+        <select id="f-pipeline"></select>
       </div>
       <div class="form-group">
         <label>Nächste Aktion</label>
@@ -971,6 +1016,30 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 </div>
 
 <!-- MOBILE MENU -->
+<!-- PIPELINE SETTINGS MODAL -->
+<div class="modal-overlay" id="pipeline-settings-modal" onclick="if(event.target===this)closePipelineSettings()">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-top-bar"></div>
+    <div class="modal-header">
+      <h2>Pipeline-Stufen anpassen</h2>
+      <button class="modal-close" onclick="closePipelineSettings()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.82rem;color:var(--gray-500);margin-bottom:16px">Stufen hinzufügen, umbenennen oder entfernen. Ziehe sie per Griff in die richtige Reihenfolge.</p>
+      <div id="pipeline-stages-list"></div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <input type="text" id="new-stage-name" placeholder="Neue Stufe..." style="flex:1;padding:10px 14px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:.88rem;font-family:inherit">
+        <input type="text" id="new-stage-icon" placeholder="Icon" value="📌" style="width:52px;padding:10px 8px;border:1px solid var(--gray-300);border-radius:var(--radius-sm);font-size:1rem;text-align:center">
+        <button class="btn btn-primary btn-sm" onclick="addPipelineStage()">Hinzufügen</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="resetPipelineStages()">Zurücksetzen</button>
+      <button class="btn btn-primary" onclick="savePipelineSettings()">Speichern</button>
+    </div>
+  </div>
+</div>
+
 <div class="mobile-menu-overlay" id="mobile-menu" onclick="if(event.target===this)toggleMobileMenu()">
   <div class="mobile-menu-sheet">
     <div class="mobile-menu-handle"></div>
@@ -1039,20 +1108,23 @@ const CATEGORIES = {
 const CALL_STATUS = {
   offen: { label: 'Noch offen', color: 'var(--gray-500)', bg: 'var(--gray-100)' },
   angerufen: { label: 'Angerufen', color: 'var(--fg-blue)', bg: 'var(--fg-blue-light)' },
+  erreicht: { label: 'Erreicht', color: 'var(--safe-green)', bg: 'var(--safe-green-bg)' },
+  mailbox: { label: 'Mailbox', color: 'var(--fg-orange)', bg: 'var(--fg-orange-light)' },
   termin: { label: 'Termin gemacht', color: 'var(--safe-green)', bg: 'var(--safe-green-bg)' },
   kein_interesse: { label: 'Kein Interesse', color: 'var(--warn-red)', bg: 'var(--warn-red-bg)' },
   nachfassen: { label: 'Nachfassen', color: 'var(--fg-orange)', bg: 'var(--fg-orange-light)' }
 };
 
-const PIPELINE_STAGES = [
-  { id: 'offen', label: 'Offen', icon: '📋', color: 'var(--gray-500)' },
-  { id: 'kontaktiert', label: 'Kontaktiert', icon: '📞', color: 'var(--fg-blue)' },
-  { id: 'interesse', label: 'Interesse', icon: '🔥', color: 'var(--fg-orange)' },
-  { id: 'termin', label: 'Termin', icon: '📅', color: 'var(--safe-green)' },
+const DEFAULT_PIPELINE_STAGES = [
+  { id: 'offen', label: 'Offen', icon: '📋', color: '#6B7280' },
+  { id: 'kontaktiert', label: 'Kontaktiert', icon: '📞', color: '#007ACB' },
+  { id: 'interesse', label: 'Interesse', icon: '🔥', color: '#FF6600' },
+  { id: 'termin', label: 'Termin', icon: '📅', color: '#86B817' },
   { id: 'angebot', label: 'Angebot', icon: '📄', color: '#9C27B0' },
   { id: 'bestandskunde', label: 'Bestandskunde', icon: '⭐', color: '#FFB300' },
-  { id: 'nachfassen', label: 'Nachfassen', icon: '🔔', color: 'var(--warn-red)' }
+  { id: 'nachfassen', label: 'Nachfassen', icon: '🔔', color: '#CC2936' }
 ];
+let PIPELINE_STAGES = JSON.parse(localStorage.getItem('kf_pipeline_stages') || 'null') || DEFAULT_PIPELINE_STAGES.map(s => ({...s}));
 
 // ===== FIREBASE SYNC =====
 const PIN_HASH = 'fba3563aed99cc02999ddc62fc1038a2c506f510d6c110aba900f70976b29640';
@@ -1402,7 +1474,7 @@ function renderContacts(resetPage) {
       ${linkedNames ? `<div class="cc-links">${linkedNames}</div>` : ''}
       <div class="cc-footer">
         <span class="cc-last-seen">Gesehen: ${c.lastSeen ? formatDate(c.lastSeen) : '—'}</span>
-        ${c.callStatus && c.callStatus !== 'offen' ? `<span class="cc-call-status" style="background:${CALL_STATUS[c.callStatus].bg};color:${CALL_STATUS[c.callStatus].color}">${CALL_STATUS[c.callStatus].label}</span>` : ''}
+        ${c.callStatus && c.callStatus !== 'offen' && CALL_STATUS[c.callStatus] ? `<span class="cc-call-status" style="background:${CALL_STATUS[c.callStatus].bg};color:${CALL_STATUS[c.callStatus].color}">${CALL_STATUS[c.callStatus].label}</span>` : ''}
       </div>
     </div>`;
   }).join('') + (hasMore ? `
@@ -1417,6 +1489,7 @@ function renderContacts(resetPage) {
 
 // ===== MODAL =====
 function openAddModal(id) {
+  populatePipelineSelect();
   document.getElementById('contact-modal').classList.add('open');
   document.getElementById('modal-title').textContent = id ? 'Kontakt bearbeiten' : 'Neuer Kontakt';
 
@@ -1605,6 +1678,16 @@ function openDetail(id) {
         </div>
         ${(c.callLog && c.callLog.length > 0) ? `<div class="call-log">${c.callLog.slice(-5).reverse().map(l => `<div class="call-log-item"><span style="color:${CALL_STATUS[l.status]?.color||'var(--gray-500)'}">${CALL_STATUS[l.status]?.label||l.status}</span><span class="cl-date">${formatDate(l.date)}</span></div>`).join('')}</div>` : ''}
       </div>
+      <div class="detail-section">
+        <h3>Pipeline-Stufe</h3>
+        <div class="detail-section-bar"></div>
+        <div class="pipeline-stage-bar">
+          ${PIPELINE_STAGES.map(s => {
+            const isActive = (c.pipeline || 'offen') === s.id;
+            return `<div class="ps-pill ${isActive ? 'active' : ''}" style="${isActive ? 'background:' + s.color + '20;color:' + s.color + ';border-color:' + s.color : ''}" onclick="quickPipelineStage('${c.id}','${s.id}')"><span class="ps-icon">${s.icon}</span>${s.label}</div>`;
+          }).join('')}
+        </div>
+      </div>
       ${c.nextAction ? `<div class="detail-section"><h3>Nächste Aktion</h3><div class="detail-section-bar"></div><div class="detail-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><div class="df-value">${esc(c.nextAction)}${c.nextDate ? ' — bis ' + formatDate(c.nextDate) : ''}</div></div></div>` : ''}
       ${c.notes ? `<div class="detail-section"><h3>Notizen</h3><div class="detail-section-bar"></div><p style="font-size:.88rem;line-height:1.6;color:var(--gray-700)">${esc(c.notes)}</p></div>` : ''}
       <div class="detail-section">
@@ -1653,6 +1736,166 @@ function quickPriority(id, p) {
   renderDashboard();
   renderContacts(false);
   toast(`${c.name} → ${priorityLabel(p)}`);
+}
+
+function quickPipelineStage(id, stage) {
+  const c = contacts.find(x => x.id === id);
+  if (!c || (c.pipeline || 'offen') === stage) return;
+  const oldStage = PIPELINE_STAGES.find(s => s.id === (c.pipeline || 'offen'));
+  const newStage = PIPELINE_STAGES.find(s => s.id === stage);
+  c.pipeline = stage;
+  c.updatedAt = new Date().toISOString();
+  save();
+  openDetail(id);
+  renderDashboard();
+  renderContacts(false);
+  renderPipeline();
+  if (currentView === 'kunden') renderKunden();
+  toast(`${c.name}: ${oldStage?.icon || ''} ${oldStage?.label || ''} → ${newStage?.icon || ''} ${newStage?.label || ''}`);
+}
+
+function filterPipeline() {
+  const q = (document.getElementById('pipeline-search')?.value || '').toLowerCase().trim();
+  const cards = document.querySelectorAll('.pipeline-card');
+  let shown = 0, total = cards.length;
+  cards.forEach(card => {
+    const name = card.querySelector('.pc-name')?.textContent?.toLowerCase() || '';
+    const info = card.querySelector('.pc-info')?.textContent?.toLowerCase() || '';
+    const action = card.querySelector('.pc-action')?.textContent?.toLowerCase() || '';
+    const match = !q || name.includes(q) || info.includes(q) || action.includes(q);
+    card.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+  const countEl = document.getElementById('pipeline-search-count');
+  if (q) {
+    countEl.textContent = `${shown} von ${total} Kontakten`;
+  } else {
+    countEl.textContent = '';
+  }
+  // Update column counts
+  document.querySelectorAll('.pipeline-col').forEach(col => {
+    const visibleCards = col.querySelectorAll('.pipeline-card:not([style*="display: none"])').length;
+    const countBadge = col.querySelector('.pipeline-col-count');
+    if (countBadge) countBadge.textContent = visibleCards;
+  });
+}
+
+// ===== PIPELINE SETTINGS =====
+function populatePipelineSelect() {
+  const sel = document.getElementById('f-pipeline');
+  if (!sel) return;
+  sel.innerHTML = PIPELINE_STAGES.map(s => `<option value="${s.id}">${s.icon} ${s.label}</option>`).join('');
+}
+
+let editingStages = [];
+
+function openPipelineSettings() {
+  editingStages = PIPELINE_STAGES.map(s => ({...s}));
+  renderPipelineStagesList();
+  document.getElementById('pipeline-settings-modal').classList.add('open');
+}
+
+function closePipelineSettings() {
+  document.getElementById('pipeline-settings-modal').classList.remove('open');
+}
+
+function renderPipelineStagesList() {
+  const list = document.getElementById('pipeline-stages-list');
+  list.innerHTML = editingStages.map((s, i) => `
+    <div class="pstage-item" draggable="true" data-idx="${i}">
+      <span class="pstage-grip" title="Verschieben">⠿</span>
+      <input class="pstage-icon-input" type="text" value="${s.icon}" maxlength="4" onchange="editingStages[${i}].icon=this.value">
+      <input class="pstage-name-input" type="text" value="${esc(s.label)}" onchange="editingStages[${i}].label=this.value;editingStages[${i}].id=slugify(this.value)">
+      <input class="pstage-color-input" type="color" value="${s.color.startsWith('#') ? s.color : '#6B7280'}" onchange="editingStages[${i}].color=this.value">
+      <button class="pstage-delete" onclick="editingStages.splice(${i},1);renderPipelineStagesList()" title="Entfernen">🗑️</button>
+    </div>
+  `).join('');
+
+  // Drag reorder
+  list.querySelectorAll('.pstage-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', item.dataset.idx);
+      item.style.opacity = '.4';
+    });
+    item.addEventListener('dragend', () => { item.style.opacity = ''; });
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over-stage'); });
+    item.addEventListener('dragleave', () => { item.classList.remove('drag-over-stage'); });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('drag-over-stage');
+      const from = parseInt(e.dataTransfer.getData('text/plain'));
+      const to = parseInt(item.dataset.idx);
+      if (from !== to) {
+        const moved = editingStages.splice(from, 1)[0];
+        editingStages.splice(to, 0, moved);
+        renderPipelineStagesList();
+      }
+    });
+  });
+}
+
+function slugify(text) {
+  return text.toLowerCase().replace(/[äÄ]/g,'ae').replace(/[öÖ]/g,'oe').replace(/[üÜ]/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+}
+
+function addPipelineStage() {
+  const nameInput = document.getElementById('new-stage-name');
+  const iconInput = document.getElementById('new-stage-icon');
+  const name = nameInput.value.trim();
+  if (!name) { nameInput.focus(); return; }
+  editingStages.push({
+    id: slugify(name),
+    label: name,
+    icon: iconInput.value || '📌',
+    color: '#6B7280'
+  });
+  nameInput.value = '';
+  iconInput.value = '📌';
+  renderPipelineStagesList();
+}
+
+function resetPipelineStages() {
+  editingStages = DEFAULT_PIPELINE_STAGES.map(s => ({...s}));
+  renderPipelineStagesList();
+  toast('Standard-Stufen wiederhergestellt');
+}
+
+function savePipelineSettings() {
+  // Check for duplicates
+  const ids = editingStages.map(s => s.id);
+  const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+  if (dupes.length > 0) {
+    toast('Doppelte Stufennamen gefunden — bitte umbenennen');
+    return;
+  }
+  if (editingStages.length < 2) {
+    toast('Mindestens 2 Stufen benötigt');
+    return;
+  }
+
+  // Map old stage IDs to new ones if renamed
+  const oldIds = PIPELINE_STAGES.map(s => s.id);
+  const newIds = editingStages.map(s => s.id);
+
+  // Update contacts whose pipeline stage was removed
+  const removedIds = oldIds.filter(id => !newIds.includes(id));
+  if (removedIds.length > 0) {
+    contacts.forEach(c => {
+      if (removedIds.includes(c.pipeline)) {
+        c.pipeline = editingStages[0].id; // move to first stage
+        c.updatedAt = new Date().toISOString();
+      }
+    });
+  }
+
+  PIPELINE_STAGES = editingStages.map(s => ({...s}));
+  localStorage.setItem('kf_pipeline_stages', JSON.stringify(PIPELINE_STAGES));
+  save();
+  populatePipelineSelect();
+  renderPipeline();
+  renderDashboard();
+  closePipelineSettings();
+  toast('Pipeline-Stufen gespeichert ✓');
 }
 
 function searchLink(contactId, query) {
