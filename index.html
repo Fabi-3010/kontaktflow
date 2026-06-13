@@ -63,11 +63,19 @@
 [data-theme="dark"] .call-status-btn{background:var(--gray-50);border-color:var(--gray-300);color:var(--gray-700)}
 [data-theme="dark"] ::-webkit-scrollbar-thumb{background:var(--gray-300)}
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#555}
+/* Dark mode Dashboard additions */
+[data-theme="dark"] .dash-overdue{background:rgba(204,41,54,.1);border-left-color:var(--warn-red)}
+[data-theme="dark"] .dash-overdue-item .doi-name{color:var(--gray-900)}
+[data-theme="dark"] .dash-pipeline-legend-item{color:var(--gray-700)}
+[data-theme="dark"] .dash-pipeline-legend-item .dpl-count{color:var(--gray-900)}
+[data-theme="dark"] .dash-pipeline-legend-item:hover{background:#262626}
+[data-theme="dark"] .ti-quick-btn{border-color:var(--gray-500);color:var(--gray-400)}
+[data-theme="dark"] .ti-quick-btn:hover{background:rgba(0,122,203,.15)}
 /* Dark mode Pipeline Settings */
 [data-theme="dark"] .pstage-item{background:#262626}
 [data-theme="dark"] .pstage-item:hover{background:#2a2a2a}
-[data-theme="dark"] .pstage-icon-input,[data-theme="dark"] .pstage-name-input{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-100)}
-[data-theme="dark"] #new-stage-name,[data-theme="dark"] #new-stage-icon{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-100)}
+[data-theme="dark"] .pstage-icon-input,[data-theme="dark"] .pstage-name-input{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-900)}
+[data-theme="dark"] #new-stage-name,[data-theme="dark"] #new-stage-icon{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-900)}
 /* Dark mode Pipeline/Detail additions */
 [data-theme="dark"] .ps-pill{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-400)}
 [data-theme="dark"] .ps-pill:hover{box-shadow:0 2px 8px rgba(0,0,0,.3)}
@@ -79,7 +87,7 @@
 [data-theme="dark"] .kunden-card .kc-contact{color:var(--gray-400)}
 [data-theme="dark"] .ins-item{background:#262626}
 [data-theme="dark"] .ins-item:hover{background:#2a2a2a}
-[data-theme="dark"] .ins-item .ins-type{color:var(--gray-100)}
+[data-theme="dark"] .ins-item .ins-type{color:var(--gray-900)}
 [data-theme="dark"] .ins-item .ins-actions button:hover{background:#333}
 [data-theme="dark"] .kc-add-ins{border-color:var(--gray-500);color:var(--fg-blue)}
 [data-theme="dark"] .kc-add-ins:hover{background:rgba(0,122,203,.1);border-color:var(--fg-blue)}
@@ -146,7 +154,7 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .section-accent{width:40px;height:2px;background:var(--fg-orange);margin:6px 0 16px 40px;border-radius:1px}
 
 /* ===== STATS ROW ===== */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
 .stat-card{background:var(--white);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:all .25s;border-left:4px solid transparent}
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);cursor:pointer}
 .stat-card .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:1.1rem}
@@ -173,6 +181,29 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .today-item .ti-name{font-weight:600;font-size:.88rem;color:var(--gray-900)}
 .today-item .ti-context{font-size:.77rem;color:var(--gray-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .today-item .ti-action{font-size:.77rem;color:var(--fg-blue);font-weight:600;flex-shrink:0}
+
+/* Dashboard Pipeline Bar */
+.dash-pipeline-bar{display:flex;border-radius:8px;overflow:hidden;height:28px;margin-bottom:12px;background:var(--gray-100)}
+.dash-pipeline-seg{display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:white;cursor:pointer;transition:all .2s;min-width:0;position:relative}
+.dash-pipeline-seg:hover{filter:brightness(1.15);transform:scaleY(1.15)}
+.dash-pipeline-seg span{text-shadow:0 1px 2px rgba(0,0,0,.3);white-space:nowrap;overflow:hidden}
+.dash-pipeline-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:4px}
+.dash-pipeline-legend-item{display:flex;align-items:center;gap:5px;font-size:.76rem;color:var(--gray-700);cursor:pointer;padding:3px 8px;border-radius:12px;transition:background .15s}
+.dash-pipeline-legend-item:hover{background:var(--gray-100)}
+.dash-pipeline-legend-item .dpl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dash-pipeline-legend-item .dpl-count{font-weight:700;color:var(--gray-900)}
+/* Dashboard Overdue */
+.dash-overdue{background:var(--warn-red-bg);border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;border-left:4px solid var(--warn-red)}
+.dash-overdue-title{font-weight:700;color:var(--warn-red);font-size:.88rem;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.dash-overdue-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:.84rem;cursor:pointer;transition:opacity .15s}
+.dash-overdue-item:hover{opacity:.7}
+.dash-overdue-item .doi-name{font-weight:600;color:var(--gray-900)}
+.dash-overdue-item .doi-date{font-size:.76rem;color:var(--warn-red);font-weight:600;margin-left:auto}
+/* Dashboard Quick Actions */
+.ti-quick-actions{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+.ti-quick-btn{background:none;border:1px solid var(--gray-200);border-radius:8px;cursor:pointer;padding:4px 8px;font-size:.7rem;color:var(--gray-500);transition:all .15s;white-space:nowrap}
+.ti-quick-btn:hover{background:var(--fg-blue-light);color:var(--fg-blue);border-color:var(--fg-blue)}
+.ti-quick-btn.active-pill{background:var(--fg-blue);color:white;border-color:var(--fg-blue)}
 
 /* ===== ACTIVITY ===== */
 .activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100);cursor:pointer;border-radius:var(--radius-sm);transition:background .15s}
@@ -708,6 +739,20 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
     </div>
     <div class="page-content">
       <div class="stats-row" id="stats-row"></div>
+
+      <!-- Pipeline Übersicht -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="section-header">
+          <div class="section-num" style="background:var(--fg-blue)">📊</div>
+          <span class="section-title-text">Pipeline-Übersicht</span>
+        </div>
+        <div class="section-accent"></div>
+        <div id="dash-pipeline"></div>
+      </div>
+
+      <!-- Überfällig -->
+      <div id="dash-overdue-wrap"></div>
+
       <div class="grid-2">
         <div class="card">
           <div class="section-header">
@@ -1326,74 +1371,130 @@ function renderDashboard() {
   const green = contacts.filter(c => c.priority === 'green').length;
   const yellow = contacts.filter(c => c.priority === 'yellow').length;
   const red = contacts.filter(c => c.priority === 'red').length;
+  const today = new Date().toISOString().slice(0,10);
+  const kunden = contacts.filter(c => (c.pipeline || 'offen') === 'bestandskunde');
+  const withActions = contacts.filter(c => c.nextAction).length;
+  const overdue = contacts.filter(c => c.nextDate && c.nextDate < today);
 
+  // === STATS ROW (6 cards) ===
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card total" onclick="goContacts('all')"><div class="stat-icon">👥</div><div class="stat-number">${contacts.length}</div><div class="stat-label">Gesamt</div></div>
     <div class="stat-card green" onclick="goContacts('green')"><div class="stat-icon">🔥</div><div class="stat-number">${green}</div><div class="stat-label">Heiße Kontakte</div></div>
     <div class="stat-card yellow" onclick="goContacts('yellow')"><div class="stat-icon">🟠</div><div class="stat-number">${yellow}</div><div class="stat-label">Warme Kontakte</div></div>
     <div class="stat-card red" onclick="goContacts('red')"><div class="stat-icon">❄️</div><div class="stat-number">${red}</div><div class="stat-label">Kalte Kontakte</div></div>
+    <div class="stat-card" onclick="switchView('kunden')" style="border-left-color:#FFB300"><div class="stat-icon" style="background:rgba(255,179,0,.12);color:#FFB300">⭐</div><div class="stat-number">${kunden.length}</div><div class="stat-label">Bestandskunden</div></div>
+    <div class="stat-card" onclick="switchView('pipeline')" style="border-left-color:var(--fg-blue)"><div class="stat-icon" style="background:var(--fg-blue-light);color:var(--fg-blue)">📋</div><div class="stat-number">${withActions}</div><div class="stat-label">Offene Aktionen</div></div>
   `;
 
-  const upcoming = contacts.filter(c => c.nextAction).sort((a, b) => (a.nextDate || '9') < (b.nextDate || '9') ? -1 : 1).slice(0, 6);
+  // === PIPELINE OVERVIEW BAR ===
+  const pipeEl = document.getElementById('dash-pipeline');
+  const stageCounts = PIPELINE_STAGES.map(s => ({...s, count: contacts.filter(c => (c.pipeline || 'offen') === s.id).length}));
+  const totalP = contacts.length || 1;
+  if (contacts.length === 0) {
+    pipeEl.innerHTML = '<div style="font-size:.84rem;color:var(--gray-500);text-align:center;padding:12px">Noch keine Kontakte</div>';
+  } else {
+    pipeEl.innerHTML = `
+      <div class="dash-pipeline-bar">
+        ${stageCounts.filter(s => s.count > 0).map(s => `<div class="dash-pipeline-seg" style="width:${Math.max(s.count/totalP*100,4)}%;background:${s.color}" onclick="switchView('pipeline')" title="${s.label}: ${s.count}"><span>${s.count > 0 ? s.count : ''}</span></div>`).join('')}
+      </div>
+      <div class="dash-pipeline-legend">
+        ${stageCounts.map(s => `<div class="dash-pipeline-legend-item" onclick="switchView('pipeline')"><div class="dpl-dot" style="background:${s.color}"></div>${s.icon} ${s.label} <span class="dpl-count">${s.count}</span></div>`).join('')}
+      </div>
+    `;
+  }
+
+  // === OVERDUE WARNING ===
+  const overdueWrap = document.getElementById('dash-overdue-wrap');
+  if (overdue.length > 0) {
+    overdueWrap.innerHTML = `
+      <div class="dash-overdue">
+        <div class="dash-overdue-title">⚠️ ${overdue.length} überfällige Aktion${overdue.length > 1 ? 'en' : ''}</div>
+        ${overdue.slice(0,5).map(c => `
+          <div class="dash-overdue-item" onclick="navigateToContact('${c.id}')">
+            <div class="priority-dot" style="background:${priorityColor(c.priority)}"></div>
+            <span class="doi-name">${esc(c.name)}</span>
+            <span style="font-size:.78rem;color:var(--gray-600)">${esc(c.nextAction || '')}</span>
+            <span class="doi-date">${formatDate(c.nextDate)}</span>
+          </div>
+        `).join('')}
+      </div>`;
+  } else {
+    overdueWrap.innerHTML = '';
+  }
+
+  // === HEUTE KONTAKTIEREN (with quick pipeline change) ===
+  const upcoming = contacts.filter(c => c.nextAction).sort((a, b) => (a.nextDate || '9') < (b.nextDate || '9') ? -1 : 1).slice(0, 8);
   const todayEl = document.getElementById('today-list');
   if (upcoming.length === 0) {
     todayEl.innerHTML = '<div class="empty-state"><p>Keine anstehenden Aktionen</p></div>';
   } else {
-    todayEl.innerHTML = upcoming.map(c => `
-      <div class="today-item" onclick="navigateToContact('${c.id}')">
-        <div class="priority-dot" style="background:${priorityColor(c.priority)}"></div>
-        <div class="ti-info">
+    todayEl.innerHTML = upcoming.map(c => {
+      const stage = PIPELINE_STAGES.find(s => s.id === (c.pipeline || 'offen'));
+      const callSt = CALL_STATUS[c.callStatus || 'offen'];
+      return `
+      <div class="today-item" style="flex-wrap:wrap;gap:8px">
+        <div class="priority-dot" style="background:${priorityColor(c.priority)}" onclick="navigateToContact('${c.id}')"></div>
+        <div class="ti-info" onclick="navigateToContact('${c.id}')" style="cursor:pointer">
           <div class="ti-name">${esc(c.name)}</div>
-          <div class="ti-context">${esc(c.nextAction)}</div>
+          <div class="ti-context">${esc(c.nextAction)}${c.nextDate ? ' — '+formatDate(c.nextDate) : ''}</div>
         </div>
-        <div class="ti-action">${c.nextDate ? formatDate(c.nextDate) : 'Offen'}</div>
-      </div>
-    `).join('');
+        <div class="ti-quick-actions">
+          <button class="ti-quick-btn" style="color:${stage?.color||'var(--gray-500)'};border-color:${stage?.color||'var(--gray-300)'}" onclick="event.stopPropagation();openDetail('${c.id}')">${stage?.icon||'📋'} ${stage?.label||'Offen'}</button>
+          <button class="ti-quick-btn" style="${callSt && c.callStatus !== 'offen' ? 'color:'+callSt.color+';border-color:'+callSt.color : ''}" onclick="event.stopPropagation();dashQuickCall('${c.id}')">${callSt?.label||'Offen'}</button>
+        </div>
+      </div>`;
+    }).join('');
   }
 
-  // Nächste Termine (contacts with nextDate in pipeline termin/angebot or any with date)
-  const today = new Date().toISOString().slice(0,10);
-  const withDate = contacts.filter(c => c.nextDate).sort((a, b) => a.nextDate < b.nextDate ? -1 : 1).slice(0, 5);
+  // === NÄCHSTE TERMINE (with calendar export) ===
+  const withDate = contacts.filter(c => c.nextDate).sort((a, b) => a.nextDate < b.nextDate ? -1 : 1).slice(0, 6);
   const apptEl = document.getElementById('next-appointments');
   if (withDate.length === 0) {
     apptEl.innerHTML = '<div class="empty-state"><p>Keine Termine geplant</p></div>';
   } else {
     apptEl.innerHTML = withDate.map(c => {
       const isPast = c.nextDate < today;
+      const stage = PIPELINE_STAGES.find(s => s.id === (c.pipeline || 'offen'));
       return `
-      <div class="today-item" onclick="navigateToContact('${c.id}')" style="${isPast ? 'border-left-color:var(--warn-red)' : ''}">
+      <div class="today-item" style="${isPast ? 'border-left-color:var(--warn-red)' : ''};flex-wrap:wrap;gap:8px">
         <div class="priority-dot" style="background:${priorityColor(c.priority)}"></div>
-        <div class="ti-info">
+        <div class="ti-info" onclick="navigateToContact('${c.id}')" style="cursor:pointer">
           <div class="ti-name">${esc(c.name)}</div>
-          <div class="ti-context">${esc(c.nextAction || 'Termin')}</div>
+          <div class="ti-context">${stage?.icon||''} ${esc(c.nextAction || 'Termin')}</div>
         </div>
-        <div class="ti-action" style="${isPast ? 'color:var(--warn-red)' : ''}">${formatDate(c.nextDate)}${isPast ? ' ⚠️' : ''}</div>
+        <div class="ti-quick-actions">
+          <span class="ti-action" style="${isPast ? 'color:var(--warn-red)' : 'color:var(--fg-blue)'};font-size:.77rem;font-weight:600">${formatDate(c.nextDate)}${isPast ? ' ⚠️' : ''}</span>
+          <button class="ti-quick-btn" onclick="event.stopPropagation();exportCalendarFor('${c.id}')" title="Kalender">📅</button>
+        </div>
       </div>`;
     }).join('');
   }
 
-  // Bestandskunden overview
-  const kunden = contacts.filter(c => (c.pipeline || 'offen') === 'bestandskunde');
+  // === BESTANDSKUNDEN ===
   const dashKundenEl = document.getElementById('dash-kunden');
   if (kunden.length === 0) {
     dashKundenEl.innerHTML = '<div class="empty-state"><p>Noch keine Bestandskunden</p></div>';
   } else {
     const allIns = kunden.reduce((acc, c) => acc.concat(c.insurances || []), []);
     const reviewDue = allIns.filter(i => i.reviewDate && i.reviewDate <= today).length;
+    const totalPremium = allIns.reduce((sum, i) => sum + (parseFloat(i.premium) || 0), 0);
     dashKundenEl.innerHTML = `
-      <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+      <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">
         <div style="font-size:.85rem;color:var(--gray-700)">⭐ <strong>${kunden.length}</strong> Kunden</div>
         <div style="font-size:.85rem;color:var(--gray-700)">📋 <strong>${allIns.length}</strong> Verträge</div>
+        <div style="font-size:.85rem;color:var(--safe-green)">💰 <strong>${totalPremium.toFixed(2)} €</strong>/Monat</div>
         ${reviewDue > 0 ? `<div style="font-size:.85rem;color:var(--fg-orange)">🔔 <strong>${reviewDue}</strong> Prüfung fällig</div>` : ''}
       </div>
       ${kunden.slice(0, 4).map(c => {
         const insCount = (c.insurances || []).length;
-        return `<div class="activity-item" onclick="switchView('kunden')"><div class="activity-dot" style="background:#FFB300"></div><div><div class="activity-text"><strong>${esc(c.name)}</strong> — ${insCount} Vertrag${insCount !== 1 ? 'e' : ''}</div><div class="activity-time">${c.phone || ''}</div></div></div>`;
+        const cPremium = (c.insurances || []).reduce((s, i) => s + (parseFloat(i.premium)||0), 0);
+        return `<div class="activity-item" onclick="navigateToContact('${c.id}')"><div class="activity-dot" style="background:#FFB300"></div><div style="flex:1"><div class="activity-text"><strong>${esc(c.name)}</strong> — ${insCount} Vertrag${insCount !== 1 ? 'e' : ''}</div><div class="activity-time">${c.phone || ''}</div></div><div style="font-size:.8rem;font-weight:600;color:var(--safe-green)">${cPremium.toFixed(2)} €</div></div>`;
       }).join('')}
       ${kunden.length > 4 ? `<div style="text-align:center;padding:8px"><a href="#" onclick="event.preventDefault();switchView('kunden')" style="font-size:.84rem;color:var(--fg-blue);font-weight:500">Alle ${kunden.length} Bestandskunden →</a></div>` : ''}
     `;
   }
 
+  // === LETZTE AKTIVITÄTEN ===
   const sorted = [...contacts].sort((a, b) => (b.updatedAt || b.createdAt) > (a.updatedAt || a.createdAt) ? 1 : -1).slice(0, 5);
   const actEl = document.getElementById('activity-list');
   if (sorted.length === 0) {
@@ -1402,10 +1503,27 @@ function renderDashboard() {
     actEl.innerHTML = sorted.map(c => {
       const days = daysAgo(c.updatedAt || c.createdAt);
       const timeStr = days === 0 ? 'Heute' : days === 1 ? 'Gestern' : `Vor ${days} Tagen`;
-      return `<div class="activity-item" onclick="navigateToContact('${c.id}')"><div class="activity-dot" style="background:${priorityColor(c.priority)}"></div><div><div class="activity-text"><strong>${esc(c.name)}</strong> — ${c.updatedAt && c.updatedAt !== c.createdAt ? 'aktualisiert' : 'hinzugefügt'}</div><div class="activity-time">${timeStr}</div></div></div>`;
+      const stage = PIPELINE_STAGES.find(s => s.id === (c.pipeline || 'offen'));
+      return `<div class="activity-item" onclick="navigateToContact('${c.id}')"><div class="activity-dot" style="background:${priorityColor(c.priority)}"></div><div style="flex:1"><div class="activity-text"><strong>${esc(c.name)}</strong> — ${c.updatedAt && c.updatedAt !== c.createdAt ? 'aktualisiert' : 'hinzugefügt'}</div><div class="activity-time">${timeStr}</div></div><span style="font-size:.68rem;padding:2px 8px;border-radius:10px;background:${stage?.color||'var(--gray-500)'}20;color:${stage?.color||'var(--gray-500)'}">${stage?.icon||''} ${stage?.label||'Offen'}</span></div>`;
     }).join('');
   }
   renderSidebarStats();
+}
+
+function dashQuickCall(id) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  const statuses = Object.keys(CALL_STATUS);
+  const currentIdx = statuses.indexOf(c.callStatus || 'offen');
+  const nextIdx = (currentIdx + 1) % statuses.length;
+  const newStatus = statuses[nextIdx];
+  c.callStatus = newStatus;
+  c.updatedAt = new Date().toISOString();
+  if (!c.callLog) c.callLog = [];
+  c.callLog.push({ status: newStatus, date: new Date().toISOString().slice(0,10) });
+  save();
+  renderDashboard();
+  toast(`${c.name} → ${CALL_STATUS[newStatus].label}`);
 }
 
 function renderSidebarStats() {
