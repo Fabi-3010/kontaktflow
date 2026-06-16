@@ -91,6 +91,10 @@
 [data-theme="dark"] .ins-item .ins-actions button:hover{background:#333}
 [data-theme="dark"] .kc-add-ins{border-color:var(--gray-500);color:var(--fg-blue)}
 [data-theme="dark"] .kc-add-ins:hover{background:rgba(0,122,203,.1);border-color:var(--fg-blue)}
+[data-theme="dark"] .pw-input{background:#1E1E1E;border-color:var(--gray-500);color:var(--gray-900)}
+[data-theme="dark"] .pw-strength{background:var(--gray-300)}
+[data-theme="dark"] .backup-reminder{background:rgba(255,102,0,.1);border-left-color:var(--fg-orange)}
+[data-theme="dark"] .backup-reminder-text{color:var(--gray-700)}
 /* Dark mode toggle */
 .theme-toggle{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
 .theme-toggle:hover{background:rgba(255,255,255,.18);color:#fff}
@@ -467,6 +471,21 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .login-error{color:var(--warn-red);font-size:.82rem;font-weight:600;margin-bottom:12px;min-height:1.2em}
 .login-setup{margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-100)}
 .login-setup p{font-size:.78rem;color:var(--gray-500);margin-bottom:10px}
+.pw-field{position:relative;margin-bottom:20px}
+.pw-input{width:100%;padding:14px 48px 14px 16px;border:2px solid var(--gray-300);border-radius:var(--radius-sm);font-size:1rem;font-family:inherit;color:var(--fg-blue-dark);transition:all .2s;box-sizing:border-box}
+.pw-input:focus{outline:none;border-color:var(--fg-blue);box-shadow:0 0 0 3px rgba(0,122,203,.15)}
+.pw-input.error{border-color:var(--warn-red);animation:shake .4s ease}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-500);padding:4px}
+.pw-toggle svg{width:20px;height:20px}
+.pw-strength{height:4px;border-radius:2px;margin-top:8px;background:var(--gray-100);overflow:hidden}
+.pw-strength-bar{height:100%;border-radius:2px;transition:width .3s,background .3s}
+.pw-hint{font-size:.72rem;color:var(--gray-500);margin-top:6px;text-align:left}
+.lockout-msg{color:var(--warn-red);font-size:.85rem;font-weight:600;margin-bottom:12px;text-align:center}
+.backup-reminder{background:rgba(255,102,0,.08);border-left:3px solid var(--fg-orange);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.backup-reminder:hover{background:rgba(255,102,0,.12)}
+.backup-reminder-text{flex:1;font-size:.82rem;color:var(--gray-700)}
+.backup-reminder-text strong{color:var(--fg-orange)}
+.backup-reminder .br-close{background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:1.2rem;padding:4px}
 
 /* ===== FOCUS MODE ===== */
 .focus-start{text-align:center;padding:60px 20px}
@@ -711,9 +730,9 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
       Import
     </button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
-    <button class="btn-data" onclick="openPinChange()" title="PIN aendern">
+    <button class="btn-data" onclick="openPwChange()" title="Passwort aendern">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      PIN
+      Passwort
     </button>
   </div>
   <div class="sidebar-footer">FLOWGATE AI</div>
@@ -1097,9 +1116,9 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Import
     </div>
-    <div class="mobile-menu-item" onclick="openPinChange();toggleMobileMenu()">
+    <div class="mobile-menu-item" onclick="openPwChange();toggleMobileMenu()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      PIN ändern
+      Passwort ändern
     </div>
     <div class="mobile-menu-item" onclick="toggleTheme();toggleMobileMenu()" style="border-top:1px solid var(--gray-100);margin-top:4px;padding-top:20px">
       <svg id="theme-icon-mobile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -1375,6 +1394,13 @@ function renderDashboard() {
   const kunden = contacts.filter(c => (c.pipeline || 'offen') === 'bestandskunde');
   const withActions = contacts.filter(c => c.nextAction).length;
   const overdue = contacts.filter(c => c.nextDate && c.nextDate < today);
+
+  // === BACKUP REMINDER ===
+  const reminderWrap = document.getElementById('stats-row').parentElement;
+  const oldReminder = reminderWrap.querySelector('.backup-reminder');
+  if (oldReminder) oldReminder.remove();
+  const reminderHtml = checkBackupReminder();
+  if (reminderHtml) document.getElementById('stats-row').insertAdjacentHTML('beforebegin', reminderHtml);
 
   // === STATS ROW (6 cards) ===
   document.getElementById('stats-row').innerHTML = `
@@ -2790,6 +2816,8 @@ function exportData() {
   a.download = `kontaktflow-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
+  localStorage.setItem('kf_last_export', new Date().toISOString());
+  document.querySelector('.backup-reminder')?.remove();
   toast('Backup heruntergeladen');
 }
 
@@ -2842,133 +2870,235 @@ function importData(event) {
   event.target.value = '';
 }
 
-// ===== PIN AUTH =====
+// ===== PASSWORD AUTH =====
 async function hashPin(pin) {
   const data = new TextEncoder().encode(pin + 'KontaktFlow_Salt_2024');
   const hash = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-function renderLogin() {
-  document.getElementById('login-content').innerHTML = `
-    <p class="login-subtitle">Gib deine 4-stellige PIN ein.</p>
-    <div class="pin-input-group">
-      <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric" autofocus>
-      <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-      <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-      <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-    </div>
-    <div class="login-error" id="login-error"></div>
-    <button class="btn btn-primary" onclick="checkPin()" style="width:100%">Entsperren</button>
-  `;
-  const inputs = document.querySelectorAll('.pin-digit');
-  inputs.forEach((inp, i) => {
-    inp.addEventListener('input', () => {
-      inp.value = inp.value.replace(/\D/g, '');
-      if (inp.value && i < inputs.length - 1) inputs[i + 1].focus();
-      if (i === inputs.length - 1 && inp.value) checkPin();
-    });
-    inp.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i - 1].focus();
-      if (e.key === 'Enter') checkPin();
-    });
-  });
-  inputs[0]?.focus();
+let failedAttempts = 0;
+let lockoutUntil = 0;
+let lockoutTimer = null;
+let lastActivity = Date.now();
+let autoLockInterval = null;
+const AUTO_LOCK_MS = 5 * 60 * 1000;
+
+function trackActivity() { lastActivity = Date.now(); }
+
+function startAutoLock() {
+  ['click','keydown','touchstart','scroll'].forEach(ev => document.addEventListener(ev, trackActivity, {passive:true}));
+  autoLockInterval = setInterval(() => {
+    const loginScreen = document.getElementById('login-screen');
+    if (loginScreen.classList.contains('hidden') && Date.now() - lastActivity > AUTO_LOCK_MS) {
+      loginScreen.classList.remove('hidden');
+      renderLogin();
+    }
+  }, 15000);
 }
 
-async function checkPin() {
-  const pin = Array.from(document.querySelectorAll('.pin-digit')).map(i => i.value).join('');
-  if (pin.length !== 4) return;
-  const hash = await hashPin(pin);
-  const customHash = localStorage.getItem('kf_pin_custom');
-  if (hash === (customHash || PIN_HASH)) {
-    document.getElementById('login-screen').classList.add('hidden');
-    await cloudLoad();
-    renderDashboard();
+function getLockoutDelay() {
+  if (failedAttempts >= 10) return 120;
+  if (failedAttempts >= 5) return 30;
+  return 0;
+}
+
+function renderLogin() {
+  const el = document.getElementById('login-content');
+  el.innerHTML = `
+    <p class="login-subtitle">Passwort eingeben</p>
+    <div class="pw-field">
+      <input class="pw-input" type="password" id="login-pw" placeholder="Passwort" autocomplete="current-password">
+      <button class="pw-toggle" type="button" onclick="togglePwVis('login-pw',this)" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <button class="btn btn-primary" onclick="checkPin()" style="width:100%" id="login-btn">Entsperren</button>
+  `;
+  const pwInput = document.getElementById('login-pw');
+  pwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkPin(); });
+  setTimeout(() => pwInput.focus(), 100);
+}
+
+function togglePwVis(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
   } else {
-    document.getElementById('login-error').textContent = 'Falsche PIN';
-    document.querySelectorAll('.pin-digit').forEach(i => { i.classList.add('error'); i.value = ''; });
-    setTimeout(() => {
-      document.querySelectorAll('.pin-digit').forEach(i => i.classList.remove('error'));
-      document.querySelector('.pin-digit')?.focus();
-    }, 400);
+    inp.type = 'password';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
   }
 }
 
-// ===== PIN CHANGE =====
-function openPinChange() {
+async function checkPin() {
+  const now = Date.now();
+  if (now < lockoutUntil) return;
+  const pw = document.getElementById('login-pw').value;
+  if (!pw) return;
+  const hash = await hashPin(pw);
+  const customHash = localStorage.getItem('kf_pin_custom');
+  if (hash === (customHash || PIN_HASH)) {
+    failedAttempts = 0;
+    document.getElementById('login-screen').classList.add('hidden');
+    lastActivity = Date.now();
+    startAutoLock();
+    await cloudLoad();
+    autoBackup();
+    renderDashboard();
+  } else {
+    failedAttempts++;
+    const delay = getLockoutDelay();
+    const errEl = document.getElementById('login-error');
+    const pwInput = document.getElementById('login-pw');
+    pwInput.classList.add('error');
+    pwInput.value = '';
+    if (delay > 0) {
+      lockoutUntil = Date.now() + delay * 1000;
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true;
+      errEl.textContent = `Zu viele Versuche — ${delay}s warten`;
+      let remaining = delay;
+      lockoutTimer = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(lockoutTimer);
+          btn.disabled = false;
+          errEl.textContent = '';
+          pwInput.classList.remove('error');
+          pwInput.focus();
+        } else {
+          errEl.textContent = `Zu viele Versuche — ${remaining}s warten`;
+        }
+      }, 1000);
+    } else {
+      errEl.textContent = `Falsches Passwort (${failedAttempts}/5)`;
+      setTimeout(() => { pwInput.classList.remove('error'); pwInput.focus(); }, 400);
+    }
+  }
+}
+
+// ===== PASSWORD CHANGE =====
+function openPwChange() {
   const overlay = document.getElementById('contact-modal');
-  document.getElementById('modal-title').textContent = 'PIN aendern';
+  document.getElementById('modal-title').textContent = 'Passwort ändern';
   const body = document.querySelector('.modal-body');
   body.innerHTML = `
     <div class="form-group">
-      <label>Aktuelle PIN</label>
-      <div class="pin-input-group" id="pin-old" style="justify-content:flex-start">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+      <label>Aktuelles Passwort</label>
+      <div class="pw-field">
+        <input class="pw-input" type="password" id="pw-old" placeholder="Aktuelles Passwort" autocomplete="current-password">
+        <button class="pw-toggle" type="button" onclick="togglePwVis('pw-old',this)" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
       </div>
     </div>
     <div class="form-group">
-      <label>Neue PIN</label>
-      <div class="pin-input-group" id="pin-new" style="justify-content:flex-start">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+      <label>Neues Passwort <span style="font-weight:400;color:var(--gray-500)">(mind. 6 Zeichen)</span></label>
+      <div class="pw-field">
+        <input class="pw-input" type="password" id="pw-new" placeholder="Neues Passwort" oninput="updatePwStrength()" autocomplete="new-password">
+        <button class="pw-toggle" type="button" onclick="togglePwVis('pw-new',this)" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
       </div>
+      <div class="pw-strength"><div class="pw-strength-bar" id="pw-strength-bar"></div></div>
+      <div class="pw-hint" id="pw-hint"></div>
     </div>
     <div class="form-group">
-      <label>Neue PIN bestaetigen</label>
-      <div class="pin-input-group" id="pin-confirm" style="justify-content:flex-start">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
-        <input class="pin-digit" type="tel" maxlength="1" inputmode="numeric">
+      <label>Passwort bestätigen</label>
+      <div class="pw-field">
+        <input class="pw-input" type="password" id="pw-confirm" placeholder="Passwort wiederholen" autocomplete="new-password">
+        <button class="pw-toggle" type="button" onclick="togglePwVis('pw-confirm',this)" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
       </div>
     </div>
-    <div class="login-error" id="pin-change-error"></div>
+    <div class="login-error" id="pw-change-error"></div>
   `;
   document.querySelector('.modal-footer').innerHTML = `
     <button class="btn btn-secondary" onclick="closeModal()">Abbrechen</button>
-    <button class="btn btn-primary" onclick="savePinChange()">PIN aendern</button>
+    <button class="btn btn-primary" onclick="savePwChange()">Passwort ändern</button>
   `;
   overlay.classList.add('open');
-  // Wire up auto-advance for all pin groups
-  ['pin-old','pin-new','pin-confirm'].forEach(gid => {
-    const inps = document.querySelectorAll('#'+gid+' .pin-digit');
-    inps.forEach((inp, i) => {
-      inp.addEventListener('input', () => {
-        inp.value = inp.value.replace(/\D/g,'');
-        if (inp.value && i < inps.length-1) inps[i+1].focus();
-      });
-      inp.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !inp.value && i > 0) inps[i-1].focus();
-      });
-    });
-  });
-  document.querySelector('#pin-old .pin-digit')?.focus();
+  document.getElementById('pw-old')?.focus();
 }
 
-async function savePinChange() {
-  const oldPin = Array.from(document.querySelectorAll('#pin-old .pin-digit')).map(i=>i.value).join('');
-  const newPin = Array.from(document.querySelectorAll('#pin-new .pin-digit')).map(i=>i.value).join('');
-  const confirmPin = Array.from(document.querySelectorAll('#pin-confirm .pin-digit')).map(i=>i.value).join('');
-  const errEl = document.getElementById('pin-change-error');
+function updatePwStrength() {
+  const pw = document.getElementById('pw-new').value;
+  const bar = document.getElementById('pw-strength-bar');
+  const hint = document.getElementById('pw-hint');
+  let score = 0;
+  if (pw.length >= 6) score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const pct = Math.min(score / 5 * 100, 100);
+  const colors = ['var(--warn-red)','var(--warn-red)','var(--fg-orange)','var(--safe-green)','var(--safe-green)'];
+  const labels = ['Sehr schwach','Schwach','Mittel','Stark','Sehr stark'];
+  bar.style.width = pct + '%';
+  bar.style.background = colors[Math.min(score, 4)];
+  hint.textContent = pw.length > 0 ? labels[Math.min(score, 4)] : '';
+}
 
-  if (oldPin.length !== 4) { errEl.textContent = 'Aktuelle PIN eingeben'; return; }
-  if (newPin.length !== 4) { errEl.textContent = 'Neue PIN eingeben (4 Ziffern)'; return; }
-  if (newPin !== confirmPin) { errEl.textContent = 'Neue PINs stimmen nicht ueberein'; return; }
-
-  const oldHash = await hashPin(oldPin);
+async function savePwChange() {
+  const oldPw = document.getElementById('pw-old').value;
+  const newPw = document.getElementById('pw-new').value;
+  const confirmPw = document.getElementById('pw-confirm').value;
+  const errEl = document.getElementById('pw-change-error');
+  if (!oldPw) { errEl.textContent = 'Aktuelles Passwort eingeben'; return; }
+  if (newPw.length < 6) { errEl.textContent = 'Neues Passwort muss mind. 6 Zeichen haben'; return; }
+  if (newPw !== confirmPw) { errEl.textContent = 'Passwörter stimmen nicht überein'; return; }
+  const oldHash = await hashPin(oldPw);
   const currentHash = localStorage.getItem('kf_pin_custom') || PIN_HASH;
-  if (oldHash !== currentHash) { errEl.textContent = 'Aktuelle PIN ist falsch'; return; }
-
-  const newHash = await hashPin(newPin);
+  if (oldHash !== currentHash) { errEl.textContent = 'Aktuelles Passwort ist falsch'; return; }
+  const newHash = await hashPin(newPw);
   localStorage.setItem('kf_pin_custom', newHash);
   closeModal();
-  toast('PIN wurde geaendert');
+  toast('Passwort wurde geändert');
+}
+
+// ===== AUTO-BACKUP =====
+function autoBackup() {
+  if (!contacts || contacts.length === 0) return;
+  const backupData = { ts: new Date().toISOString(), count: contacts.length, contacts: contacts };
+  fetch(FB_URL + FB_PATH + '/backups.json').then(r => r.json()).then(data => {
+    const backups = data && typeof data === 'object' ? Object.entries(data) : [];
+    if (backups.length >= 5) {
+      backups.sort((a, b) => a[1].ts.localeCompare(b[1].ts));
+      const oldest = backups.slice(0, backups.length - 4);
+      oldest.forEach(([key]) => {
+        fetch(FB_URL + FB_PATH + '/backups/' + key + '.json', { method: 'DELETE' }).catch(() => {});
+      });
+    }
+    const key = 'b_' + Date.now();
+    fetch(FB_URL + FB_PATH + '/backups/' + key + '.json', { method: 'PUT', body: JSON.stringify(backupData) }).catch(() => {});
+  }).catch(() => {
+    const key = 'b_' + Date.now();
+    fetch(FB_URL + FB_PATH + '/backups/' + key + '.json', { method: 'PUT', body: JSON.stringify(backupData) }).catch(() => {});
+  });
+  localStorage.setItem('kf_last_autobackup', new Date().toISOString());
+}
+
+function checkBackupReminder() {
+  const lastExport = localStorage.getItem('kf_last_export');
+  if (!lastExport) {
+    localStorage.setItem('kf_last_export', new Date().toISOString());
+    return '';
+  }
+  const days = Math.floor((Date.now() - new Date(lastExport).getTime()) / 86400000);
+  if (days >= 7) {
+    return `<div class="backup-reminder" onclick="exportData()">
+      <span style="font-size:1.4rem">💾</span>
+      <div class="backup-reminder-text">
+        <strong>Backup-Erinnerung:</strong> Letzter manueller Export vor ${days} Tagen.
+        Tippe hier für ein lokales Backup.
+      </div>
+      <button class="br-close" onclick="event.stopPropagation();this.parentElement.remove()" title="Schließen">&times;</button>
+    </div>`;
+  }
+  return '';
 }
 
 // ===== SERVICE WORKER =====
