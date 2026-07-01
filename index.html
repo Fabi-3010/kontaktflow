@@ -336,6 +336,12 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 #network-canvas{width:100%;border-radius:var(--radius);background:var(--white);box-shadow:var(--shadow);cursor:grab}
 #network-canvas:active{cursor:grabbing}
 .network-legend{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap}
+.qlr-add-new{border-top:1px solid var(--gray-100);background:var(--fg-blue-light)}
+.qlr-add-new:hover{background:rgba(0,122,203,.15)!important}
+.qlr-add-new .qlr-dot{color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.net-zoom-controls{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:2}
+.net-zoom-btn{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--gray-200);background:var(--white);color:var(--gray-700);font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.1);transition:all .15s}
+.net-zoom-btn:hover{background:var(--fg-blue-light);color:var(--fg-blue);border-color:var(--fg-blue)}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:.83rem;color:var(--gray-700)}
 .legend-dot{width:12px;height:12px;border-radius:50%}
 
@@ -899,7 +905,14 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
         <div class="legend-item"><div class="legend-dot" style="background:var(--warn-red)"></div> Kalt</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--gray-300)"></div> Verbindung</div>
       </div>
-      <canvas id="network-canvas" height="560"></canvas>
+      <div style="position:relative">
+        <canvas id="network-canvas" height="560"></canvas>
+        <div class="net-zoom-controls">
+          <button class="net-zoom-btn" onclick="netZoom(1.3)" title="Vergrößern">+</button>
+          <button class="net-zoom-btn" onclick="netZoom(1/1.3)" title="Verkleinern">−</button>
+          <button class="net-zoom-btn" onclick="netFitAll()" title="Alles anzeigen" style="font-size:14px">⊞</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2056,15 +2069,21 @@ function searchLink(contactId, query) {
     .filter(x => x.name.toLowerCase().includes(q) || (x.phone || '').includes(q))
     .slice(0, 8);
 
-  if (matches.length === 0) {
+  const matchHtml = matches.map(m => `
+    <div class="qlr-item" onmousedown="quickLink('${contactId}','${m.id}')">
+      <div class="qlr-dot" style="background:${priorityColor(m.priority)}"></div>
+      <span class="qlr-name">${esc(m.name)}</span>
+      <span class="qlr-phone">${esc(m.phone || '')}</span>
+    </div>`).join('');
+  const addNewHtml = q.length >= 2 ? `
+    <div class="qlr-item qlr-add-new" onmousedown="quickAddAndLink('${contactId}','${esc(query.trim())}')">
+      <div class="qlr-dot" style="background:var(--fg-blue)">+</div>
+      <span class="qlr-name" style="color:var(--fg-blue)">„${esc(query.trim())}" neu erstellen + verknüpfen</span>
+    </div>` : '';
+  if (matches.length === 0 && !addNewHtml) {
     res.innerHTML = '<div style="padding:12px 14px;font-size:.84rem;color:var(--gray-500)">Keine Treffer</div>';
   } else {
-    res.innerHTML = matches.map(m => `
-      <div class="qlr-item" onmousedown="quickLink('${contactId}','${m.id}')">
-        <div class="qlr-dot" style="background:${priorityColor(m.priority)}"></div>
-        <span class="qlr-name">${esc(m.name)}</span>
-        <span class="qlr-phone">${esc(m.phone || '')}</span>
-      </div>`).join('');
+    res.innerHTML = matchHtml + addNewHtml;
   }
   res.classList.add('open');
 }
@@ -2085,6 +2104,22 @@ function quickLink(fromId, toId) {
   openDetail(fromId);
   renderContacts(false);
   toast(`${from.name} ↔ ${to.name} verknüpft`);
+}
+
+function quickAddAndLink(fromId, name) {
+  const from = contacts.find(x => x.id === fromId);
+  if (!from) return;
+  const now = new Date().toISOString();
+  const newId = genId();
+  const newContact = { id: newId, name, phone: '', address: '', category: '', context: '', lastSeen: '', callStatus: 'offen', pipeline: 'offen', nextAction: '', nextDate: '', notes: '', priority: 'yellow', links: [fromId], createdAt: now, updatedAt: now };
+  contacts.push(newContact);
+  if (!from.links) from.links = [];
+  from.links.push(newId);
+  from.updatedAt = now;
+  save();
+  openDetail(fromId);
+  renderContacts(false);
+  toast(`${name} erstellt + mit ${from.name} verknüpft`);
 }
 
 function closeQLResults(e) {
@@ -2443,11 +2478,35 @@ function exportCalendar() {
 }
 
 // ===== NETWORK =====
+let camX = 0, camY = 0, camScale = 1;
+
+function netZoom(factor) {
+  const canvas = document.getElementById('network-canvas');
+  const cxScreen = canvas.width / 2, cyScreen = canvas.height / 2;
+  const wxBefore = (cxScreen - camX) / camScale, wyBefore = (cyScreen - camY) / camScale;
+  camScale = Math.max(0.2, Math.min(4, camScale * factor));
+  camX = cxScreen - wxBefore * camScale;
+  camY = cyScreen - wyBefore * camScale;
+}
+
+function netFitAll() {
+  if (networkNodes.length === 0) return;
+  const canvas = document.getElementById('network-canvas');
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const n of networkNodes) { minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x); minY = Math.min(minY, n.y); maxY = Math.max(maxY, n.y); }
+  const pad = 100;
+  const w = (maxX - minX) + pad * 2 || 1;
+  const h = (maxY - minY) + pad * 2 || 1;
+  camScale = Math.max(0.15, Math.min(canvas.width / w, canvas.height / h, 2));
+  camX = canvas.width / 2 - ((minX + maxX) / 2) * camScale;
+  camY = canvas.height / 2 - ((minY + maxY) / 2) * camScale;
+}
+
 function initNetwork() {
   const canvas = document.getElementById('network-canvas');
   const ctx = canvas.getContext('2d');
   canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = 560;
+  canvas.height = Math.max(460, Math.min(700, window.innerHeight - 240));
 
   const linkedContacts = contacts.filter(c => c.links && c.links.length > 0);
   const linkedIds = new Set(linkedContacts.map(c => c.id));
@@ -2464,64 +2523,110 @@ function initNetwork() {
     return;
   }
 
-  const cx = canvas.width / 2, cy = canvas.height / 2;
+  camX = 0; camY = 0; camScale = 1;
+  const wcx = canvas.width / 2, wcy = canvas.height / 2;
+  const spread = Math.min(wcx, wcy) * 0.4 + netContacts.length * 3;
   networkNodes = netContacts.map((c, i) => {
     const angle = (2 * Math.PI * i) / netContacts.length;
-    const r = Math.min(cx, cy) * 0.6;
     return {
       id: c.id,
-      x: cx + r * Math.cos(angle) + (Math.random() - .5) * 40,
-      y: cy + r * Math.sin(angle) + (Math.random() - .5) * 40,
+      x: wcx + spread * Math.cos(angle) + (Math.random() - .5) * 40,
+      y: wcy + spread * Math.sin(angle) + (Math.random() - .5) * 40,
       vx: 0, vy: 0,
-      name: c.name, priority: c.priority, links: c.links || []
+      name: c.name, priority: c.priority, links: c.links || [],
+      linkCount: (c.links || []).length
     };
   });
 
-  let dragging = null, mouseX = 0, mouseY = 0, dragStartX = 0, dragStartY = 0, didDrag = false;
+  let dragging = null, panning = false, mouseX = 0, mouseY = 0;
+  let dragStartX = 0, dragStartY = 0, panStartCamX = 0, panStartCamY = 0, didDrag = false;
+
+  function screenToWorld(sx, sy) { return [(sx - camX) / camScale, (sy - camY) / camScale]; }
   function canvasXY(e) {
     const rect = canvas.getBoundingClientRect();
     return [(e.clientX - rect.left) * (canvas.width / rect.width), (e.clientY - rect.top) * (canvas.height / rect.height)];
   }
+
   canvas.onmousedown = (e) => {
-    const [x, y] = canvasXY(e);
-    dragStartX = x; dragStartY = y; didDrag = false;
-    for (const n of networkNodes) if (Math.hypot(n.x - x, n.y - y) < 28) { dragging = n; break; }
+    const [sx, sy] = canvasXY(e);
+    const [wx, wy] = screenToWorld(sx, sy);
+    dragStartX = sx; dragStartY = sy; didDrag = false; dragging = null; panning = false;
+    for (const n of networkNodes) if (Math.hypot(n.x - wx, n.y - wy) < 28 / camScale) { dragging = n; return; }
+    panning = true; panStartCamX = camX; panStartCamY = camY;
   };
   canvas.onmousemove = (e) => {
-    [mouseX, mouseY] = canvasXY(e);
+    const [sx, sy] = canvasXY(e);
+    const [wx, wy] = screenToWorld(sx, sy);
+    mouseX = wx; mouseY = wy;
     if (dragging) {
-      dragging.x = mouseX; dragging.y = mouseY; dragging.vx = 0; dragging.vy = 0;
-      if (Math.hypot(mouseX - dragStartX, mouseY - dragStartY) > 5) didDrag = true;
+      dragging.x = wx; dragging.y = wy; dragging.vx = 0; dragging.vy = 0;
+      if (Math.hypot(sx - dragStartX, sy - dragStartY) > 5) didDrag = true;
+    } else if (panning) {
+      camX = panStartCamX + (sx - dragStartX);
+      camY = panStartCamY + (sy - dragStartY);
+      if (Math.hypot(sx - dragStartX, sy - dragStartY) > 5) didDrag = true;
     }
     let overNode = false;
-    for (const n of networkNodes) if (Math.hypot(n.x - mouseX, n.y - mouseY) < 28) { overNode = true; break; }
-    canvas.style.cursor = overNode ? 'pointer' : (dragging ? 'grabbing' : 'grab');
+    for (const n of networkNodes) if (Math.hypot(n.x - wx, n.y - wy) < 28 / camScale) { overNode = true; break; }
+    canvas.style.cursor = overNode ? 'pointer' : (dragging ? 'grabbing' : (panning ? 'grabbing' : 'grab'));
   };
   canvas.onmouseup = () => {
-    if (dragging && !didDrag) { openDetail(dragging.id); }
-    dragging = null;
+    if (dragging && !didDrag) openDetail(dragging.id);
+    dragging = null; panning = false;
   };
-  // Touch support for mobile
+  canvas.onwheel = (e) => {
+    e.preventDefault();
+    const [sx, sy] = canvasXY(e);
+    const [wxBefore, wyBefore] = screenToWorld(sx, sy);
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    camScale = Math.max(0.2, Math.min(4, camScale * factor));
+    camX = sx - wxBefore * camScale;
+    camY = sy - wyBefore * camScale;
+  };
+
+  let lastTouchDist = 0;
   canvas.ontouchstart = (e) => {
+    if (e.touches.length === 2) {
+      lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      e.preventDefault(); return;
+    }
     const touch = e.touches[0];
-    const [x, y] = canvasXY(touch);
-    dragStartX = x; dragStartY = y; didDrag = false;
-    for (const n of networkNodes) if (Math.hypot(n.x - x, n.y - y) < 35) { dragging = n; e.preventDefault(); break; }
+    const [sx, sy] = canvasXY(touch);
+    const [wx, wy] = screenToWorld(sx, sy);
+    dragStartX = sx; dragStartY = sy; didDrag = false; dragging = null; panning = false;
+    for (const n of networkNodes) if (Math.hypot(n.x - wx, n.y - wy) < 35 / camScale) { dragging = n; e.preventDefault(); return; }
+    panning = true; panStartCamX = camX; panStartCamY = camY; e.preventDefault();
   };
   canvas.ontouchmove = (e) => {
-    if (!dragging) return;
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      if (lastTouchDist > 0) { const f = d / lastTouchDist; netZoom(f); }
+      lastTouchDist = d; return;
+    }
     e.preventDefault();
     const touch = e.touches[0];
-    [mouseX, mouseY] = canvasXY(touch);
-    dragging.x = mouseX; dragging.y = mouseY; dragging.vx = 0; dragging.vy = 0;
-    if (Math.hypot(mouseX - dragStartX, mouseY - dragStartY) > 10) didDrag = true;
+    const [sx, sy] = canvasXY(touch);
+    const [wx, wy] = screenToWorld(sx, sy);
+    mouseX = wx; mouseY = wy;
+    if (dragging) {
+      dragging.x = wx; dragging.y = wy; dragging.vx = 0; dragging.vy = 0;
+      if (Math.hypot(sx - dragStartX, sy - dragStartY) > 10) didDrag = true;
+    } else if (panning) {
+      camX = panStartCamX + (sx - dragStartX);
+      camY = panStartCamY + (sy - dragStartY);
+      if (Math.hypot(sx - dragStartX, sy - dragStartY) > 10) didDrag = true;
+    }
   };
-  canvas.ontouchend = () => {
-    if (dragging && !didDrag) { openDetail(dragging.id); }
-    dragging = null;
+  canvas.ontouchend = (e) => {
+    if (e.touches.length === 0) { lastTouchDist = 0; }
+    if (dragging && !didDrag) openDetail(dragging.id);
+    dragging = null; panning = false;
   };
 
   if (networkAnim) cancelAnimationFrame(networkAnim);
+  const repulsion = 2500 + netContacts.length * 80;
+  const springStrength = 0.006;
 
   function simulate() {
     for (const n of networkNodes) {
@@ -2529,66 +2634,81 @@ function initNetwork() {
         if (n === m) continue;
         const dx = n.x - m.x, dy = n.y - m.y;
         const dist = Math.max(Math.hypot(dx, dy), 1);
-        const f = 3000 / (dist * dist);
+        const f = repulsion / (dist * dist);
         n.vx += (dx / dist) * f; n.vy += (dy / dist) * f;
       }
       for (const lid of n.links) {
         const m = networkNodes.find(x => x.id === lid);
         if (!m) continue;
-        n.vx += (m.x - n.x) * .005; n.vy += (m.y - n.y) * .005;
+        const dx = m.x - n.x, dy = m.y - n.y;
+        const dist = Math.hypot(dx, dy);
+        const ideal = 100 + (n.linkCount + m.linkCount) * 6;
+        const f = (dist - ideal) * springStrength;
+        n.vx += (dx / Math.max(dist, 1)) * f;
+        n.vy += (dy / Math.max(dist, 1)) * f;
       }
-      n.vx += (cx - n.x) * .001; n.vy += (cy - n.y) * .001;
+      n.vx += (wcx - n.x) * .003; n.vy += (wcy - n.y) * .003;
     }
 
     for (const n of networkNodes) {
       if (n === dragging) continue;
-      n.vx *= .85; n.vy *= .85;
+      n.vx *= .82; n.vy *= .82;
       n.x += n.vx; n.y += n.vy;
-      n.x = Math.max(40, Math.min(canvas.width - 40, n.x));
-      n.y = Math.max(40, Math.min(canvas.height - 40, n.y));
+      const bound = 800 + netContacts.length * 30;
+      n.x = Math.max(wcx - bound, Math.min(wcx + bound, n.x));
+      n.y = Math.max(wcy - bound, Math.min(wcy + bound, n.y));
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(camX, camY);
+    ctx.scale(camScale, camScale);
 
     for (const n of networkNodes) {
       for (const lid of n.links) {
         const m = networkNodes.find(x => x.id === lid);
         if (!m) continue;
         ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y);
-        ctx.strokeStyle = 'rgba(224,224,224,.6)'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.strokeStyle = 'rgba(200,200,200,.5)'; ctx.lineWidth = 1.5 / camScale; ctx.stroke();
       }
     }
 
     let hovered = null;
-    for (const n of networkNodes) if (Math.hypot(n.x - mouseX, n.y - mouseY) < 28) hovered = n;
+    for (const n of networkNodes) if (Math.hypot(n.x - mouseX, n.y - mouseY) < 28 / camScale) hovered = n;
+
+    const nodeR = 22 / Math.max(camScale, 0.5);
+    const fontSize = Math.max(9, 11 / Math.max(camScale, 0.6));
+    const labelSize = Math.max(9, 12 / Math.max(camScale, 0.6));
 
     for (const n of networkNodes) {
       const col = priorityColor(n.priority);
       const isHov = n === hovered;
-      const r = isHov ? 26 : 22;
+      const r = isHov ? nodeR * 1.15 : nodeR;
 
-      ctx.beginPath(); ctx.arc(n.x, n.y, r + 4, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(n.x, n.y, r + 3 / camScale, 0, Math.PI * 2);
       ctx.fillStyle = col + '20'; ctx.fill();
 
       ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
       ctx.fillStyle = col; ctx.fill();
 
       ctx.fillStyle = '#fff';
-      ctx.font = `${isHov ? '600 13' : '600 11'}px -apple-system,system-ui,sans-serif`;
+      ctx.font = `600 ${fontSize}px -apple-system,system-ui,sans-serif`;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(n.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(), n.x, n.y);
 
       ctx.fillStyle = isHov ? '#212121' : '#616161';
-      ctx.font = `${isHov ? '600 13' : '12'}px -apple-system,system-ui,sans-serif`;
+      ctx.font = `${isHov ? '600 ' : ''}${labelSize}px -apple-system,system-ui,sans-serif`;
       ctx.textBaseline = 'top';
-      ctx.fillText(n.name, n.x, n.y + r + 8);
+      ctx.fillText(n.name, n.x, n.y + r + 6 / camScale);
     }
+    ctx.restore();
     networkAnim = requestAnimationFrame(simulate);
   }
+  setTimeout(() => netFitAll(), 800);
   simulate();
 }
 
-function resetNetwork() { initNetwork(); }
+function resetNetwork() { camX = 0; camY = 0; camScale = 1; initNetwork(); }
 window.addEventListener('resize', () => {
   if (document.querySelector('.nav-items li.active')?.dataset.view === 'network') initNetwork();
 });
