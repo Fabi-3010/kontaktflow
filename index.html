@@ -342,6 +342,21 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .net-zoom-controls{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:2}
 .net-zoom-btn{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--gray-200);background:var(--white);color:var(--gray-700);font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.1);transition:all .15s}
 .net-zoom-btn:hover{background:var(--fg-blue-light);color:var(--fg-blue);border-color:var(--fg-blue)}
+.net-canvas-wrap{position:relative}
+.net-mobile-cards{display:none}
+.net-card{background:var(--white);border-radius:var(--radius-sm);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;border-left:4px solid var(--gray-300)}
+.net-card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer}
+.net-card-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0}
+.net-card-name{font-weight:600;font-size:.95rem;color:var(--gray-900)}
+.net-card-meta{font-size:.75rem;color:var(--gray-500);margin-top:2px}
+.net-card-links{display:flex;flex-wrap:wrap;gap:6px}
+.net-card-link{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--gray-50);border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;font-size:.8rem}
+.net-card-link:active{background:var(--fg-blue-light)}
+.net-card-link-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.net-card-link-name{color:var(--gray-700);font-weight:500}
+.net-card-empty{text-align:center;padding:40px 20px;color:var(--gray-500);font-size:.9rem}
+.net-card-empty span{display:block;margin-top:8px;font-size:.8rem;color:var(--gray-400)}
+.net-card-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;margin-left:auto;flex-shrink:0}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:.83rem;color:var(--gray-700)}
 .legend-dot{width:12px;height:12px;border-radius:50%}
 
@@ -601,7 +616,8 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   .form-group input,.form-group textarea,.form-group select{padding:12px 14px;font-size:.92rem}
   .pipeline-board{padding:10px 12px 16px;gap:10px;height:calc(100vh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom));scroll-snap-type:x mandatory}
   .pipeline-col{min-width:75vw;max-width:80vw}
-  #network-canvas{height:400px}
+  .net-canvas-wrap{display:none}
+  .net-mobile-cards{display:block}
   .network-legend{gap:14px;font-size:.78rem}
   .today-item{padding:14px}
   .activity-item{padding:12px 6px}
@@ -905,7 +921,7 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
         <div class="legend-item"><div class="legend-dot" style="background:var(--warn-red)"></div> Kalt</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--gray-300)"></div> Verbindung</div>
       </div>
-      <div style="position:relative">
+      <div class="net-canvas-wrap">
         <canvas id="network-canvas" height="560"></canvas>
         <div class="net-zoom-controls">
           <button class="net-zoom-btn" onclick="netZoom(1.3)" title="Vergrößern">+</button>
@@ -913,6 +929,7 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
           <button class="net-zoom-btn" onclick="netFitAll()" title="Alles anzeigen" style="font-size:14px">⊞</button>
         </div>
       </div>
+      <div class="net-mobile-cards" id="network-mobile"></div>
     </div>
   </div>
 
@@ -1395,7 +1412,7 @@ function switchView(name) {
   if (name === 'focus') renderFocusStart();
   if (name === 'pipeline') renderPipeline();
   if (name === 'kunden') renderKunden();
-  if (name === 'network') initNetwork();
+  if (name === 'network') { window.innerWidth <= 768 ? renderNetworkMobile() : initNetwork(); }
 }
 
 // ===== DASHBOARD =====
@@ -2708,10 +2725,56 @@ function initNetwork() {
   simulate();
 }
 
-function resetNetwork() { camX = 0; camY = 0; camScale = 1; initNetwork(); }
+function resetNetwork() { camX = 0; camY = 0; camScale = 1; if (window.innerWidth <= 768) renderNetworkMobile(); else initNetwork(); }
 window.addEventListener('resize', () => {
-  if (document.querySelector('.nav-items li.active')?.dataset.view === 'network') initNetwork();
+  if (document.querySelector('.nav-items li.active')?.dataset.view === 'network') { window.innerWidth <= 768 ? renderNetworkMobile() : initNetwork(); }
 });
+
+function renderNetworkMobile() {
+  if (networkAnim) { cancelAnimationFrame(networkAnim); networkAnim = null; }
+  const container = document.getElementById('network-mobile');
+
+  const linkedContacts = contacts.filter(c => c.links && c.links.length > 0);
+  const linkedIds = new Set(linkedContacts.map(c => c.id));
+  linkedContacts.forEach(c => (c.links || []).forEach(lid => linkedIds.add(lid)));
+  const netContacts = contacts.filter(c => linkedIds.has(c.id));
+
+  if (netContacts.length === 0) {
+    container.innerHTML = '<div class="net-card-empty">Noch keine Verknüpfungen vorhanden<span>Verknüpfe Kontakte im Detail-Panel, um dein Netzwerk zu sehen</span></div>';
+    return;
+  }
+
+  const sorted = [...netContacts].sort((a, b) => {
+    const al = (a.links || []).length, bl = (b.links || []).length;
+    if (bl !== al) return bl - al;
+    return a.name.localeCompare(b.name);
+  });
+
+  const priorityLabel = p => p === 'green' ? 'Heiß' : p === 'yellow' ? 'Warm' : 'Kalt';
+  const borderColor = p => p === 'green' ? 'var(--safe-green)' : p === 'yellow' ? 'var(--fg-orange)' : 'var(--warn-red)';
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  container.innerHTML = sorted.map(c => {
+    const col = priorityColor(c.priority);
+    const initials = c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const linkCount = (c.links || []).length;
+    const linkedCards = (c.links || []).map(lid => {
+      const lc = contacts.find(x => x.id === lid);
+      if (!lc) return '';
+      const lcol = priorityColor(lc.priority);
+      return `<div class="net-card-link" onclick="openDetail('${lc.id}')"><div class="net-card-link-dot" style="background:${lcol}"></div><span class="net-card-link-name">${esc(lc.name)}</span></div>`;
+    }).filter(Boolean).join('');
+
+    return `<div class="net-card" style="border-left-color:${borderColor(c.priority)}">
+      <div class="net-card-header" onclick="openDetail('${c.id}')">
+        <div class="net-card-avatar" style="background:${col}">${initials}</div>
+        <div><div class="net-card-name">${esc(c.name)}</div><div class="net-card-meta">${priorityLabel(c.priority)} · ${linkCount} Verbindung${linkCount !== 1 ? 'en' : ''}</div></div>
+        <div class="net-card-badge" style="background:${col}20;color:${col}">${linkCount}</div>
+      </div>
+      <div class="net-card-links">${linkedCards}</div>
+    </div>`;
+  }).join('');
+}
 
 // ===== FOCUS MODE =====
 let focusTimer = null;
