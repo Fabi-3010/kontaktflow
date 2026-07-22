@@ -1226,6 +1226,8 @@ const PIN_HASH = 'fba3563aed99cc02999ddc62fc1038a2c506f510d6c110aba900f70976b296
 const FB_URL = 'https://kontaktflow-479a0-default-rtdb.europe-west1.firebasedatabase.app';
 const FB_PATH = '/users/' + PIN_HASH;
 let syncInProgress = false;
+let syncInterval = null;
+let pendingSave = false;
 
 function save() {
   localStorage.setItem('kf_contacts', JSON.stringify(contacts));
@@ -1233,58 +1235,107 @@ function save() {
 }
 
 function cloudSave() {
-  if (syncInProgress) return;
+  if (syncInProgress) { pendingSave = true; return; }
   fetch(FB_URL + FB_PATH + '/contacts.json', {
     method: 'PUT',
     body: JSON.stringify(contacts)
+  }).then(() => {
+    fetch(FB_URL + FB_PATH + '/stages.json', {
+      method: 'PUT',
+      body: JSON.stringify(PIPELINE_STAGES)
+    }).catch(() => {});
   }).catch(() => {});
 }
 
+function mergeContacts(cloudData) {
+  if (!cloudData || !Array.isArray(cloudData) || cloudData.length === 0) return false;
+  const localMap = {};
+  contacts.forEach(c => { localMap[c.id] = c; });
+  const cloudMap = {};
+  cloudData.forEach(c => { cloudMap[c.id] = c; });
+  const allIds = new Set([...Object.keys(localMap), ...Object.keys(cloudMap)]);
+  const merged = [];
+  let changed = false;
+  allIds.forEach(id => {
+    const local = localMap[id];
+    const cloud = cloudMap[id];
+    if (!local) { merged.push(cloud); changed = true; }
+    else if (!cloud) { merged.push(local); changed = true; }
+    else {
+      const lt = new Date(local.updatedAt || 0).getTime();
+      const ct = new Date(cloud.updatedAt || 0).getTime();
+      if (ct > lt) { merged.push(cloud); changed = true; }
+      else { merged.push(local); if (ct < lt) changed = true; }
+    }
+  });
+  contacts = merged;
+  localStorage.setItem('kf_contacts', JSON.stringify(contacts));
+  return changed;
+}
+
 async function cloudLoad() {
+  if (syncInProgress) return;
   try {
     syncInProgress = true;
-    const res = await fetch(FB_URL + FB_PATH + '/contacts.json');
-    const data = await res.json();
-    if (data && Array.isArray(data) && data.length > 0) {
-      // Cloud has data — merge: take the version with latest updatedAt per contact
-      const localMap = {};
-      contacts.forEach(c => { localMap[c.id] = c; });
-      const cloudMap = {};
-      data.forEach(c => { cloudMap[c.id] = c; });
-      // Merge: for each ID, take the one with the latest updatedAt
-      const allIds = new Set([...Object.keys(localMap), ...Object.keys(cloudMap)]);
-      const merged = [];
-      allIds.forEach(id => {
-        const local = localMap[id];
-        const cloud = cloudMap[id];
-        if (!local) { merged.push(cloud); }
-        else if (!cloud) { merged.push(local); }
-        else {
-          const lt = new Date(local.updatedAt || 0).getTime();
-          const ct = new Date(cloud.updatedAt || 0).getTime();
-          merged.push(ct > lt ? cloud : local);
-        }
-      });
-      contacts = merged;
-      localStorage.setItem('kf_contacts', JSON.stringify(contacts));
-      // Push merged result back to cloud
-      fetch(FB_URL + FB_PATH + '/contacts.json', {
-        method: 'PUT',
-        body: JSON.stringify(contacts)
-      }).catch(() => {});
-    } else if (contacts.length > 0) {
-      // Cloud is empty, push local data up
-      fetch(FB_URL + FB_PATH + '/contacts.json', {
-        method: 'PUT',
-        body: JSON.stringify(contacts)
-      }).catch(() => {});
+    const [contactsRes, stagesRes] = await Promise.all([
+      fetch(FB_URL + FB_PATH + '/contacts.json'),
+      fetch(FB_URL + FB_PATH + '/stages.json')
+    ]);
+    const data = await contactsRes.json();
+    const stagesData = await stagesRes.json();
+
+    const hadChanges = mergeContacts(data);
+
+    if (stagesData && Array.isArray(stagesData) && stagesData.length > 0) {
+      PIPELINE_STAGES = stagesData;
+      localStorage.setItem('kf_pipeline_stages', JSON.stringify(PIPELINE_STAGES));
     }
+
+    // Push merged/local data back to cloud
+    fetch(FB_URL + FB_PATH + '/contacts.json', {
+      method: 'PUT',
+      body: JSON.stringify(contacts)
+    }).catch(() => {});
+    fetch(FB_URL + FB_PATH + '/stages.json', {
+      method: 'PUT',
+      body: JSON.stringify(PIPELINE_STAGES)
+    }).catch(() => {});
+
+    if (hadChanges) refreshCurrentView();
   } catch(e) {
     console.log('Cloud sync failed, using local data');
   } finally {
     syncInProgress = false;
+    if (pendingSave) { pendingSave = false; cloudSave(); }
   }
 }
+
+function refreshCurrentView() {
+  const active = document.querySelector('.nav-items li.active');
+  if (!active) return;
+  const view = active.dataset.view;
+  if (view === 'dashboard') renderDashboard();
+  else if (view === 'contacts') renderContacts();
+  else if (view === 'pipeline') renderPipeline();
+  else if (view === 'kunden') renderKunden();
+}
+
+function startSync() {
+  if (syncInterval) clearInterval(syncInterval);
+  syncInterval = setInterval(() => {
+    if (!document.getElementById('login-screen').classList.contains('hidden')) return;
+    cloudLoad();
+  }, 30000);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && document.getElementById('login-screen').classList.contains('hidden')) {
+    cloudLoad();
+  }
+});
+window.addEventListener('focus', () => {
+  if (document.getElementById('login-screen').classList.contains('hidden')) cloudLoad();
+});
 
 function goContacts(filter) {
   switchView('contacts');
@@ -3128,6 +3179,7 @@ async function checkPin() {
     lastActivity = Date.now();
     startAutoLock();
     await cloudLoad();
+    startSync();
     autoBackup();
     renderDashboard();
   } else {
