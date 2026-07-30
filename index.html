@@ -252,6 +252,13 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .cc-link-badge{padding:3px 10px;background:var(--fg-blue-light);color:var(--fg-blue);border-radius:12px;font-size:.74rem;font-weight:500}
 .cc-footer{margin-top:12px;display:flex;justify-content:space-between;align-items:center}
 .cc-last-seen{font-size:.76rem;color:var(--gray-500)}
+.cc-termin{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 12px;border-radius:var(--radius-sm);font-size:.8rem;font-weight:500}
+.cc-termin svg{width:14px;height:14px;flex-shrink:0}
+.cc-termin.upcoming{background:rgba(0,122,203,.08);color:var(--fg-blue);border:1px solid rgba(0,122,203,.15)}
+.cc-termin.past{background:rgba(204,41,54,.08);color:var(--warn-red);border:1px solid rgba(204,41,54,.15)}
+.cc-termin.today{background:rgba(134,184,23,.1);color:var(--safe-green);border:1px solid rgba(134,184,23,.2)}
+.cc-no-action{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 12px;border-radius:var(--radius-sm);font-size:.78rem;font-weight:500;background:rgba(255,102,0,.07);color:var(--fg-orange);border:1px solid rgba(255,102,0,.12)}
+.cc-no-action svg{width:14px;height:14px;flex-shrink:0}
 
 /* ===== BESTANDSKUNDEN ===== */
 .kunden-stats{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
@@ -1666,6 +1673,23 @@ function renderContacts(resetPage) {
   if (currentFilter !== 'all') list = list.filter(c => c.priority === currentFilter);
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q) || (c.context || '').toLowerCase().includes(q) || (c.address || '').toLowerCase().includes(q) || (c.phone || '').includes(q));
 
+  const today = new Date().toISOString().slice(0,10);
+  list = [...list].sort((a, b) => {
+    const aHas = a.nextAction || a.nextDate;
+    const bHas = b.nextAction || b.nextDate;
+    if (!aHas && bHas) return -1;
+    if (aHas && !bHas) return 1;
+    if (aHas && bHas) {
+      const aOver = a.nextDate && a.nextDate < today;
+      const bOver = b.nextDate && b.nextDate < today;
+      if (aOver && !bOver) return -1;
+      if (!aOver && bOver) return 1;
+      if (a.nextDate && b.nextDate) return a.nextDate < b.nextDate ? -1 : 1;
+    }
+    const po = {green:0, yellow:1, red:2};
+    return (po[a.priority]||1) - (po[b.priority]||1);
+  });
+
   const grid = document.getElementById('contacts-grid');
   if (list.length === 0) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
@@ -1697,6 +1721,20 @@ function renderContacts(resetPage) {
         ${c.context ? `<div class="cc-detail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${esc(c.context)}</div>` : ''}
         ${c.nextAction ? `<div class="cc-detail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>${esc(c.nextAction)}</div>` : ''}
       </div>
+      ${(() => {
+        if (c.nextDate || c.nextAction) {
+          const td = new Date().toISOString().slice(0,10);
+          const isToday = c.nextDate === td;
+          const isPast = c.nextDate && c.nextDate < td;
+          const cls = isToday ? 'today' : isPast ? 'past' : 'upcoming';
+          const icon = isToday ? '🟢' : isPast ? '⚠️' : '📅';
+          const label = isPast ? 'Überfällig' : isToday ? 'Heute' : (c.nextDate ? formatDate(c.nextDate) : '');
+          return `<div class="cc-termin ${cls}">${icon} ${esc(c.nextAction || 'Termin')}${label ? ' — '+label : ''}</div>`;
+        } else if (c.priority !== 'red' && (c.pipeline || 'offen') !== 'bestandskunde') {
+          return '<div class="cc-no-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Keine Aktion geplant</div>';
+        }
+        return '';
+      })()}
       ${linkedNames ? `<div class="cc-links">${linkedNames}</div>` : ''}
       <div class="cc-footer">
         <span class="cc-last-seen">Gesehen: ${c.lastSeen ? formatDate(c.lastSeen) : '—'}</span>
