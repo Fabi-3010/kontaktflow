@@ -1774,6 +1774,9 @@ function renderContacts(resetPage) {
           const icon = isToday ? '🟢' : isPast ? '⚠️' : '📅';
           const label = isPast ? 'Überfällig' : isToday ? 'Heute' : (c.nextDate ? formatDate(c.nextDate) : '');
           return `<div class="cc-termin ${cls}">${icon} ${esc(c.nextAction || 'Termin')}${label ? ' — '+label : ''}<button class="cc-termin-done" onclick="event.stopPropagation();openActionComplete('${c.id}')">Erledigt ✓</button></div>`;
+        } else if (c.callStatus && c.callStatus !== 'offen' && CALL_STATUS[c.callStatus]) {
+          const cs = CALL_STATUS[c.callStatus];
+          return `<div class="cc-termin upcoming" style="background:${cs.bg};color:${cs.color};border-color:${cs.color}30">📞 ${cs.label}</div>`;
         } else if (c.priority !== 'red' && (c.pipeline || 'offen') !== 'bestandskunde') {
           return '<div class="cc-no-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Keine Aktion geplant</div>';
         }
