@@ -831,6 +831,9 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .btn-beratung{background:var(--fg-blue);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .2s}
 .btn-beratung:hover{opacity:.85}
 .btn-beratung svg{width:16px;height:16px}
+.activity-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:.7rem;font-weight:600;background:var(--fg-blue);color:#fff;white-space:nowrap;line-height:1}
+.activity-badge.has-many{background:var(--safe-green)}
+.activity-badge svg{width:11px;height:11px}
 .bp-card{background:var(--gray-50);border:1px solid var(--gray-200);border-left:3px solid var(--fg-blue);border-radius:var(--radius-sm);padding:14px 16px}
 .bp-text{font-size:.88rem;line-height:1.7;color:var(--gray-700);white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;margin-bottom:10px}
 .bp-edit{background:var(--fg-blue);color:#fff;border:none;padding:6px 14px;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:opacity .15s}
@@ -1916,7 +1919,7 @@ function renderTasks() {
         <div class="tv-header" onclick="toggleTaskCard('${c.id}')">
           <div class="tv-dot" style="background:${priorityColor(c.priority)}"></div>
           <div class="tv-info">
-            <div class="tv-name">${esc(c.name)}</div>
+            <div class="tv-name">${esc(c.name)}${(c.actionLog && c.actionLog.length > 0) ? ' <span class="activity-badge' + (c.actionLog.length >= 5 ? ' has-many' : '') + '">' + c.actionLog.length + ' ✓</span>' : ''}</div>
             <div class="tv-meta">
               <span class="tv-action-chip" onclick="event.stopPropagation();openEditAction('${c.id}')">${esc(c.nextAction)}</span>
               ${c.phone ? '<span>📞 ' + esc(c.phone) + '</span>' : ''}
@@ -2188,7 +2191,7 @@ function renderContacts(resetPage) {
     return `
     <div class="contact-card p-${c.priority}" onclick="openDetail('${c.id}')">
       <div class="cc-header">
-        <div class="cc-name">${esc(c.name)}</div>
+        <div class="cc-name">${esc(c.name)}${(c.actionLog && c.actionLog.length > 0) ? ' <span class="activity-badge' + (c.actionLog.length >= 5 ? ' has-many' : '') + '">' + c.actionLog.length + ' ✓</span>' : ''}</div>
         <span class="cc-priority ${c.priority}">${priorityLabel(c.priority)}</span>
       </div>
       <div class="cc-details">
