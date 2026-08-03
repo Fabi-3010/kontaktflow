@@ -1794,7 +1794,7 @@ function renderDashboard() {
         <div class="task-item ${cls}" onclick="openDetail('${c.id}')">
           <div class="task-dot" style="background:${priorityColor(c.priority)}"></div>
           <div class="task-info">
-            <div class="task-name">${esc(c.name)}</div>
+            <div class="task-name">${esc(c.name)}${(c.actionLog && c.actionLog.length > 0) ? ' <span class="activity-badge' + (c.actionLog.length >= 5 ? ' has-many' : '') + '">' + c.actionLog.length + ' ✓</span>' : ''}</div>
             <div class="task-action"><span onclick="event.stopPropagation();openEditAction('${c.id}')" style="cursor:pointer;text-decoration:underline;text-decoration-style:dotted">${esc(c.nextAction || 'Aktion')}</span></div>
           </div>
           ${c.nextDate ? `<span class="task-date" style="color:${dateColor}">${isPast ? '⚠️ ' : ''}${formatDate(c.nextDate)}</span>` : ''}
