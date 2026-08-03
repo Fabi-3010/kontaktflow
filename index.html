@@ -1969,32 +1969,75 @@ let beratungContactId = null;
 let beratungSaveTimer = null;
 
 const BERATUNG_DICT = [
-  'KFZ-Versicherung','KFZ-Haftpflicht','KFZ-Vollkasko','KFZ-Teilkasko','KFZ-Wechsel',
-  'Lebensversicherung','Risikolebensversicherung','Kapitallebensversicherung',
-  'Berufsunfähigkeitsversicherung','BU-Versicherung','BU-Rente','BU-Nachversicherung',
-  'Hausratversicherung','Hausrat erweitern','Hausrat Elementar',
-  'Haftpflichtversicherung','Privathaftpflicht','Tierhalterhaftpflicht','Gewerbehaftpflicht',
-  'Wohngebäudeversicherung','Gebäudeversicherung','Elementarversicherung',
-  'Rechtsschutzversicherung','Verkehrsrechtsschutz','Privatrechtsschutz',
-  'Unfallversicherung','Kinderunfallversicherung',
+  // KFZ
+  'KFZ-Versicherung','KFZ-Haftpflicht','KFZ-Vollkasko','KFZ-Teilkasko','KFZ-Wechsel','KFZ-Schutzbrief','KFZ-Rabattschutz',
+  // Leben
+  'Lebensversicherung','Risikolebensversicherung','Kapitallebensversicherung','Sterbegeldversicherung',
+  // BU
+  'Berufsunfähigkeitsversicherung','BU-Versicherung','BU-Rente','BU-Nachversicherung','Dienstunfähigkeitsversicherung','Erwerbsminderungsrente',
+  // Hausrat / Gebäude
+  'Hausratversicherung','Hausrat erweitern','Hausrat Elementar','Glasversicherung',
+  'Wohngebäudeversicherung','Gebäudeversicherung','Elementarversicherung','Photovoltaikversicherung',
+  // Haftpflicht
+  'Haftpflichtversicherung','Privathaftpflicht','Tierhalterhaftpflicht','Hundehaftpflicht','Pferdehaftpflicht','Gewerbehaftpflicht','Berufshaftpflicht','Vermögensschadenhaftpflicht','Bauherrenhaftpflicht',
+  // Rechtsschutz
+  'Rechtsschutzversicherung','Verkehrsrechtsschutz','Privatrechtsschutz','Berufsrechtsschutz','Mietrechtsschutz',
+  // Unfall
+  'Unfallversicherung','Kinderunfallversicherung','Gruppenunfallversicherung','Invalidität','Unfallrente',
+  // Kranken
   'Krankenversicherung','Private Krankenversicherung','Gesetzliche Krankenversicherung','PKV','GKV',
-  'Krankenzusatzversicherung','Krankentagegeld','Krankenhaustagegeld',
-  'Zahnzusatzversicherung','Zahnersatz','Zahnprophylaxe',
-  'Pflegeversicherung','Pflegezusatzversicherung','Pflege-Bahr',
+  'Krankenzusatzversicherung','Krankentagegeld','Krankenhaustagegeld','Heilpraktikerversicherung',
+  'Zahnzusatzversicherung','Zahnersatz','Zahnprophylaxe','Zahnstaffel','Brillenversicherung','Sehhilfe',
+  // Pflege
+  'Pflegeversicherung','Pflegezusatzversicherung','Pflege-Bahr','Pflegetagegeld','Pflegegrad','Pflegestufe',
+  // Rente / Vorsorge
   'Rentenversicherung','Private Rentenversicherung','Riester-Rente','Rürup-Rente','Betriebsrente','bAV',
-  'Reiseversicherung','Reiserücktrittsversicherung','Auslandskrankenversicherung',
-  'Altersvorsorge','Vermögensaufbau','Fondspolice','ETF-Police',
-  'Selbstbeteiligung','Schadenfreiheitsklasse','Deckungssumme','Beitrag','Prämie','Laufzeit',
-  'Vergleich erstellen','Angebot erstellen','Angebot zusenden','Antrag unterschreiben',
-  'Vollkasko','Teilkasko','Rabattschutz','Schutzbrief','Mallorca-Police',
-  'Nachfassen','Rückruf vereinbart','Unterlagen zusenden','Termin vereinbaren',
-  'Bestandsaufnahme','Versorgungslücke','Absicherung','Deckungskonzept',
-  'Kunde wünscht','Kunde hat','Kunde möchte','Kunde interessiert sich für',
-  'Ehepartner mitversichern','Kinder mitversichern','Familientarif',
-  'Vertrag kündigen','Vertrag wechseln','Vertrag anpassen','Vertragslaufzeit',
-  'Beitragsfrei stellen','Dynamik','Beitragserhöhung','Beitragsbefreiung',
-  'Schaden melden','Schadenfall','Schadensregulierung',
-  'Gesundheitsfragen','Gesundheitsprüfung','Vorerkrankung','Risikovoranfrage'
+  'Altersvorsorge','Vermögensaufbau','Fondspolice','ETF-Police','Fondssparplan','Vermögenswirksame Leistungen',
+  // Reise
+  'Reiseversicherung','Reiserücktrittsversicherung','Auslandskrankenversicherung','Reisegepäckversicherung',
+  // Baufinanzierung / Immobilien
+  'Baufinanzierung','Immobilienfinanzierung','Anschlussfinanzierung','Umschuldung','Forward-Darlehen',
+  'Annuitätendarlehen','Tilgungsrate','Sondertilgung','Sollzinsbindung','Zinsbindung','Effektivzins','Sollzins',
+  'Grundschuld','Grundbuch','Grundbucheintrag','Notarkosten','Grunderwerbsteuer','Maklerprovision',
+  'Eigenkapital','Eigenkapitalquote','Kaufnebenkosten','Beleihungswert','Beleihungsgrenze',
+  'Bausparen','Bausparvertrag','Wohn-Riester','KfW-Förderung','KfW-Darlehen',
+  'Modernisierung','Sanierung','Renovierung','Energetische Sanierung',
+  // Gewerbe
+  'Betriebshaftpflicht','Inhaltsversicherung','Betriebsunterbrechung','Cyberversicherung','Geschäftsinhaltsversicherung',
+  'Firmenrechtsschutz','D&O-Versicherung','Schlüsselversicherung',
+  // Fachbegriffe
+  'Selbstbeteiligung','Schadenfreiheitsklasse','Deckungssumme','Beitrag','Prämie','Laufzeit','Wartezeit',
+  'Versicherungssumme','Versicherungsnehmer','Versicherungsbeginn','Versicherungsschein','Police',
+  'Vollkasko','Teilkasko','Rabattschutz','Schutzbrief','Mallorca-Police','Werkstattbindung',
+  'Selbstbehalt','Höchstleistung','Erstattung','Leistungsausschluss','Karenzzeit',
+  'Dynamik','Beitragserhöhung','Beitragsbefreiung','Beitragsfrei stellen','Rückkaufswert','Überschussbeteiligung',
+  'Tarifwechsel','Tarifoptimierung','Beitragsanpassung','Konditionsanpassung',
+  // Schaden
+  'Schaden melden','Schadenfall','Schadensregulierung','Schadenfreiheit','Schadenverlauf','Regress',
+  // Gesundheit
+  'Gesundheitsfragen','Gesundheitsprüfung','Vorerkrankung','Risikovoranfrage','Annahmerichtlinien','Risikozuschlag','Leistungsausschluss',
+  // Kunde / Beratung
+  'Kunde wünscht','Kunde hat','Kunde möchte','Kunde interessiert sich für','Kunde benötigt','Kunde fragt nach',
+  'Kunde hat bereits','Kunde hat aktuell','Kunde ist zufrieden','Kunde ist unzufrieden',
+  'Kunde bittet um','Kunde erwartet','Kunde lehnt ab','Kunde überlegt noch','Kunde stimmt zu',
+  'Ehepartner mitversichern','Kinder mitversichern','Familientarif','Familienstand',
+  'Beratungsbedarf','Beratungswunsch','Erstberatung','Folgeberatung','Jahresgespräch',
+  // Aktionen
+  'Vergleich erstellen','Angebot erstellen','Angebot zusenden','Angebot nachfassen',
+  'Antrag unterschreiben','Antrag einreichen','Antrag nachreichen',
+  'Unterlagen zusenden','Unterlagen anfordern','Unterlagen fehlen','Unterlagen vollständig',
+  'Nachfassen','Rückruf vereinbart','Termin vereinbaren','Termin bestätigt','Folgetermin',
+  'Bestandsaufnahme','Versorgungslücke','Absicherung','Deckungskonzept','Bedarfsanalyse',
+  'Vertrag kündigen','Vertrag wechseln','Vertrag anpassen','Vertragslaufzeit','Vertragsverlängerung',
+  'Kündigung einreichen','Kündigungsfrist','Sonderkündigungsrecht','Widerrufsrecht',
+  // Zahlung / Finanzen
+  'Monatsbeitrag','Jahresbeitrag','Einmalbeitrag','Zahlungsweise','Bankeinzug','Lastschrift','Überweisung',
+  'Provision','Courtage','Stornohaftung','Bestandspflege',
+  // Allgemein
+  'Zusammenfassung','Empfehlung','Hinweis','Wichtig','Dringend','Offen','Erledigt','Ausstehend',
+  'Bestätigung','Genehmigung','Zustimmung','Ablehnung','Prüfung','Freigabe',
+  'Nachtrag','Ergänzung','Korrektur','Änderung','Aktualisierung',
+  'Telefongespräch','Beratungsgespräch','Kundengespräch','Hausbesuch','Videoberatung'
 ];
 
 function getBeratungWord(ta) {
