@@ -811,6 +811,32 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   .stat-card{padding:10px 12px}
   .stat-card .stat-number{font-size:1.05rem}
 }
+
+/* BERATUNGSMODUS */
+.beratung-overlay{position:fixed;inset:0;background:var(--white);z-index:2000;display:none;flex-direction:column}
+.beratung-overlay.open{display:flex}
+.beratung-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:2px solid var(--fg-blue);flex-shrink:0}
+.beratung-header h2{font-size:1.2rem;font-weight:700;color:var(--fg-blue);margin:0}
+.beratung-header h2 span{font-weight:400;color:var(--gray-500);font-size:.9rem}
+.beratung-close{background:var(--warn-red);color:#fff;border:none;padding:10px 20px;border-radius:var(--radius-sm);font-size:.88rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.beratung-close:hover{opacity:.85}
+.beratung-body{flex:1;display:flex;flex-direction:column;padding:20px 24px;overflow:hidden}
+.beratung-notes{flex:1;width:100%;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:16px 20px;font-size:1.05rem;line-height:1.7;font-family:inherit;resize:none;color:var(--gray-900);background:var(--white);outline:none;transition:border-color .2s}
+.beratung-notes:focus{border-color:var(--fg-blue)}
+.beratung-notes::placeholder{color:var(--gray-400)}
+.beratung-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-top:1px solid var(--gray-200);flex-shrink:0}
+.beratung-saved{font-size:.82rem;color:var(--safe-green);font-weight:600;opacity:0;transition:opacity .3s}
+.beratung-saved.show{opacity:1}
+.beratung-time{font-size:.78rem;color:var(--gray-400)}
+.btn-beratung{background:var(--fg-blue);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .2s}
+.btn-beratung:hover{opacity:.85}
+.btn-beratung svg{width:16px;height:16px}
+@media(max-width:600px){
+  .beratung-header{padding:14px 16px}
+  .beratung-body{padding:14px 16px}
+  .beratung-notes{font-size:1rem;padding:12px 14px}
+  .beratung-footer{padding:10px 16px}
+}
 </style>
 </head>
 <body>
@@ -1899,6 +1925,7 @@ function renderTasks() {
             <button class="tv-btn tv-btn-green" onclick="openActionComplete('${c.id}')">Erledigt ✓</button>
             <button class="tv-btn tv-btn-primary" onclick="openEditAction('${c.id}')">Bearbeiten</button>
             <button class="tv-btn tv-btn-outline" onclick="openDetail('${c.id}')">Kontakt öffnen</button>
+            <button class="tv-btn" style="background:var(--fg-blue);color:#fff" onclick="startBeratung('${c.id}')">Beratung</button>
           </div>
           ${historyHtml}
         </div>
@@ -1923,6 +1950,61 @@ function saveTaskNote(id, value) {
     const saved = document.getElementById('tv-saved-' + id);
     if (saved) { saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500); }
   }, 800);
+}
+
+// ===== BERATUNGSMODUS =====
+let beratungContactId = null;
+let beratungSaveTimer = null;
+
+function startBeratung(id) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  beratungContactId = id;
+  closeDetail();
+  document.getElementById('beratung-title').innerHTML = 'Beratung &mdash; <span>' + esc(c.name) + '</span>';
+  const ta = document.getElementById('beratung-notes');
+  ta.value = c.beratungNotes || '';
+  document.getElementById('beratung-saved').classList.remove('show');
+  updateBeratungTime();
+  document.getElementById('beratung-overlay').classList.add('open');
+  setTimeout(() => ta.focus(), 200);
+  ta.oninput = function() {
+    clearTimeout(beratungSaveTimer);
+    beratungSaveTimer = setTimeout(() => saveBeratungNotes(), 800);
+  };
+}
+
+function saveBeratungNotes() {
+  const c = contacts.find(x => x.id === beratungContactId);
+  if (!c) return;
+  c.beratungNotes = document.getElementById('beratung-notes').value;
+  c.updatedAt = new Date().toISOString();
+  save();
+  const el = document.getElementById('beratung-saved');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+  updateBeratungTime();
+}
+
+function updateBeratungTime() {
+  const now = new Date();
+  document.getElementById('beratung-time').textContent = now.toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit'}) + ' Uhr';
+}
+
+function endBeratung() {
+  const ta = document.getElementById('beratung-notes');
+  if (ta.value.trim() && beratungContactId) {
+    const c = contacts.find(x => x.id === beratungContactId);
+    if (c) {
+      c.beratungNotes = ta.value;
+      c.updatedAt = new Date().toISOString();
+      save();
+    }
+  }
+  document.getElementById('beratung-overlay').classList.remove('open');
+  beratungContactId = null;
+  clearTimeout(beratungSaveTimer);
+  toast('Beratung gespeichert');
 }
 
 // ===== CONTACTS =====
@@ -2433,6 +2515,7 @@ function openDetail(id) {
       </div>
     </div>
     <div class="detail-actions">
+      <button class="btn-beratung" onclick="startBeratung('${c.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Beratung</button>
       <button class="btn btn-primary" onclick="closeDetail();openAddModal('${c.id}')">Bearbeiten</button>
       <button class="btn btn-danger" onclick="deleteContact('${c.id}')">Löschen</button>
     </div>
@@ -3969,5 +4052,20 @@ if ('serviceWorker' in navigator) {
 // Start with login
 renderLogin();
 </script>
+<!-- BERATUNGSMODUS -->
+<div class="beratung-overlay" id="beratung-overlay">
+  <div class="beratung-header">
+    <h2 id="beratung-title">Beratung</h2>
+    <button class="beratung-close" onclick="endBeratung()">Beratung beenden</button>
+  </div>
+  <div class="beratung-body">
+    <textarea class="beratung-notes" id="beratung-notes" spellcheck="true" lang="de" placeholder="Notizen hier eingeben..."></textarea>
+  </div>
+  <div class="beratung-footer">
+    <span class="beratung-saved" id="beratung-saved">&#10003; Gespeichert</span>
+    <span class="beratung-time" id="beratung-time"></span>
+  </div>
+</div>
+
 </body>
 </html>
