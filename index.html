@@ -415,7 +415,7 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .net-zoom-controls{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:2}
 .net-zoom-btn{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--gray-200);background:var(--white);color:var(--gray-700);font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.1);transition:all .15s}
 .net-zoom-btn:hover{background:var(--fg-blue-light);color:var(--fg-blue);border-color:var(--fg-blue)}
-.net-canvas-wrap{position:relative}
+.net-canvas-wrap{position:relative;background:var(--gray-50);border-radius:var(--radius);overflow:hidden}
 .net-mobile-cards{display:none}
 .net-card{background:var(--white);border-radius:var(--radius-sm);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;border-left:4px solid var(--gray-300)}
 .net-card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer}
@@ -430,8 +430,32 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .net-card-empty{text-align:center;padding:40px 20px;color:var(--gray-500);font-size:.9rem}
 .net-card-empty span{display:block;margin-top:8px;font-size:.8rem;color:var(--gray-400)}
 .net-card-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;margin-left:auto;flex-shrink:0}
+.net-group-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:12px 0 6px;color:var(--gray-500);display:flex;align-items:center;gap:8px}
+.net-group-label::after{content:'';flex:1;height:1px;background:var(--gray-200)}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:.83rem;color:var(--gray-700)}
 .legend-dot{width:12px;height:12px;border-radius:50%}
+.reminder-overlay{position:fixed;inset:0;background:rgba(0,58,107,.5);backdrop-filter:blur(8px);z-index:1200;display:none;align-items:center;justify-content:center;padding:20px}
+.reminder-overlay.open{display:flex}
+.reminder-modal{background:var(--white);border-radius:var(--radius);width:100%;max-width:480px;max-height:80vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.2);animation:modalIn .3s ease}
+.reminder-header{padding:24px 24px 16px;text-align:center}
+.reminder-header h2{font-size:1.2rem;font-weight:700;color:var(--warn-red);margin-bottom:4px}
+.reminder-header p{font-size:.85rem;color:var(--gray-600)}
+.reminder-list{padding:0 24px}
+.reminder-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-sm);margin-bottom:8px;border-left:3px solid var(--warn-red)}
+.reminder-item.age1{background:rgba(255,102,0,.06);border-left-color:var(--fg-orange)}
+.reminder-item.age2{background:rgba(204,41,54,.06);border-left-color:var(--warn-red)}
+.reminder-item.age3{background:rgba(204,41,54,.12);border-left-color:#991122}
+.rem-info{flex:1;min-width:0}
+.rem-name{font-weight:600;font-size:.88rem;color:var(--gray-900)}
+.rem-action{font-size:.78rem;color:var(--gray-600);margin-top:2px}
+.rem-days{font-size:.72rem;font-weight:600;color:var(--warn-red);white-space:nowrap}
+.rem-btns{display:flex;gap:6px;margin-top:6px}
+.rem-btn{padding:4px 10px;border-radius:6px;border:none;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s}
+.rem-btn-done{background:var(--safe-green);color:#fff}
+.rem-btn-push{background:var(--gray-100);color:var(--gray-700)}
+.rem-btn-push:hover{background:var(--gray-200)}
+.reminder-footer{padding:16px 24px 24px;text-align:center}
+.reminder-footer button{width:100%}
 
 /* ===== MODAL ===== */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,58,107,.35);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
@@ -995,6 +1019,20 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   </div>
 
 </main>
+
+<!-- REMINDER MODAL -->
+<div class="reminder-overlay" id="reminder-overlay" onclick="if(event.target===this)closeReminder()">
+  <div class="reminder-modal">
+    <div class="reminder-header">
+      <h2 id="rem-title">Überfällige Aufgaben</h2>
+      <p id="rem-subtitle"></p>
+    </div>
+    <div class="reminder-list" id="rem-list"></div>
+    <div class="reminder-footer">
+      <button class="btn btn-primary" onclick="closeReminder()">Verstanden</button>
+    </div>
+  </div>
+</div>
 
 <!-- EDIT ACTION SHEET -->
 <div class="edit-action-pop" id="edit-action-pop" onclick="if(event.target===this)closeEditAction()">
@@ -2902,20 +2940,31 @@ function initNetwork() {
 
   camX = 0; camY = 0; camScale = 1;
   const wcx = canvas.width / 2, wcy = canvas.height / 2;
-  const spread = Math.min(wcx, wcy) * 0.4 + netContacts.length * 3;
+  const clusterCenters = {
+    green: { x: wcx, y: wcy - wcy * 0.35 },
+    yellow: { x: wcx - wcx * 0.35, y: wcy + wcy * 0.2 },
+    red: { x: wcx + wcx * 0.35, y: wcy + wcy * 0.2 }
+  };
+  const clusterRadius = Math.min(wcx, wcy) * 0.28;
+
   networkNodes = netContacts.map((c, i) => {
-    const angle = (2 * Math.PI * i) / netContacts.length;
+    const p = c.priority || 'yellow';
+    const center = clusterCenters[p] || clusterCenters.yellow;
+    const groupContacts = netContacts.filter(x => (x.priority || 'yellow') === p);
+    const gi = groupContacts.indexOf(c);
+    const angle = (2 * Math.PI * gi) / Math.max(groupContacts.length, 1);
+    const r = clusterRadius * 0.5 + (groupContacts.length > 1 ? clusterRadius * 0.4 : 0);
     return {
       id: c.id,
-      x: wcx + spread * Math.cos(angle) + (Math.random() - .5) * 40,
-      y: wcy + spread * Math.sin(angle) + (Math.random() - .5) * 40,
-      vx: 0, vy: 0,
+      x: center.x + r * Math.cos(angle) + (Math.random() - .5) * 20,
+      y: center.y + r * Math.sin(angle) + (Math.random() - .5) * 20,
+      vx: 0, vy: 0, cluster: p,
       name: c.name, priority: c.priority, links: c.links || [],
       linkCount: (c.links || []).length
     };
   });
 
-  let dragging = null, panning = false, mouseX = 0, mouseY = 0;
+  let dragging = null, panning = false, mouseX = -9999, mouseY = -9999;
   let dragStartX = 0, dragStartY = 0, panStartCamX = 0, panStartCamY = 0, didDrag = false;
 
   function screenToWorld(sx, sy) { return [(sx - camX) / camScale, (sy - camY) / camScale]; }
@@ -2947,6 +2996,7 @@ function initNetwork() {
     for (const n of networkNodes) if (Math.hypot(n.x - wx, n.y - wy) < 28 / camScale) { overNode = true; break; }
     canvas.style.cursor = overNode ? 'pointer' : (dragging ? 'grabbing' : (panning ? 'grabbing' : 'grab'));
   };
+  canvas.onmouseleave = () => { mouseX = -9999; mouseY = -9999; };
   canvas.onmouseup = () => {
     if (dragging && !didDrag) openDetail(dragging.id);
     dragging = null; panning = false;
@@ -3002,34 +3052,45 @@ function initNetwork() {
   };
 
   if (networkAnim) cancelAnimationFrame(networkAnim);
-  const repulsion = 2500 + netContacts.length * 80;
-  const springStrength = 0.006;
+  const repulsion = 2800 + netContacts.length * 100;
+  const springStrength = 0.005;
+  const clusterGravity = 0.008;
+  const nodeMap = {};
+  networkNodes.forEach(n => { nodeMap[n.id] = n; });
+
+  const priorityColors = { green: '#86B817', yellow: '#FF6600', red: '#CC2936' };
+  const priorityLabels = { green: 'Heiß', yellow: 'Warm', red: 'Kalt' };
 
   function simulate() {
     for (const n of networkNodes) {
       for (const m of networkNodes) {
         if (n === m) continue;
+        const sameCluster = n.cluster === m.cluster;
         const dx = n.x - m.x, dy = n.y - m.y;
         const dist = Math.max(Math.hypot(dx, dy), 1);
-        const f = repulsion / (dist * dist);
+        const rep = sameCluster ? repulsion * 0.8 : repulsion * 1.4;
+        const f = rep / (dist * dist);
         n.vx += (dx / dist) * f; n.vy += (dy / dist) * f;
       }
       for (const lid of n.links) {
-        const m = networkNodes.find(x => x.id === lid);
+        const m = nodeMap[lid];
         if (!m) continue;
         const dx = m.x - n.x, dy = m.y - n.y;
         const dist = Math.hypot(dx, dy);
-        const ideal = 100 + (n.linkCount + m.linkCount) * 6;
+        const ideal = 90 + (n.linkCount + m.linkCount) * 5;
         const f = (dist - ideal) * springStrength;
         n.vx += (dx / Math.max(dist, 1)) * f;
         n.vy += (dy / Math.max(dist, 1)) * f;
       }
-      n.vx += (wcx - n.x) * .003; n.vy += (wcy - n.y) * .003;
+      const cc = clusterCenters[n.cluster] || clusterCenters.yellow;
+      n.vx += (cc.x - n.x) * clusterGravity;
+      n.vy += (cc.y - n.y) * clusterGravity;
+      n.vx += (wcx - n.x) * .001; n.vy += (wcy - n.y) * .001;
     }
 
     for (const n of networkNodes) {
       if (n === dragging) continue;
-      n.vx *= .82; n.vy *= .82;
+      n.vx *= .78; n.vy *= .78;
       n.x += n.vx; n.y += n.vy;
       const bound = 800 + netContacts.length * 30;
       n.x = Math.max(wcx - bound, Math.min(wcx + bound, n.x));
@@ -3041,32 +3102,70 @@ function initNetwork() {
     ctx.translate(camX, camY);
     ctx.scale(camScale, camScale);
 
-    for (const n of networkNodes) {
-      for (const lid of n.links) {
-        const m = networkNodes.find(x => x.id === lid);
-        if (!m) continue;
-        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y);
-        ctx.strokeStyle = 'rgba(200,200,200,.5)'; ctx.lineWidth = 1.5 / camScale; ctx.stroke();
-      }
+    for (const p of ['green', 'yellow', 'red']) {
+      const group = networkNodes.filter(n => n.cluster === p);
+      if (group.length === 0) continue;
+      let gx = 0, gy = 0;
+      group.forEach(n => { gx += n.x; gy += n.y; });
+      gx /= group.length; gy /= group.length;
+      let maxDist = 0;
+      group.forEach(n => { const d = Math.hypot(n.x - gx, n.y - gy); if (d > maxDist) maxDist = d; });
+      const zr = maxDist + 60;
+      ctx.beginPath(); ctx.arc(gx, gy, zr, 0, Math.PI * 2);
+      ctx.fillStyle = priorityColors[p] + '08'; ctx.fill();
+      ctx.strokeStyle = priorityColors[p] + '18'; ctx.lineWidth = 1.5 / camScale; ctx.setLineDash([4 / camScale, 4 / camScale]); ctx.stroke(); ctx.setLineDash([]);
+      const labelSize = Math.max(10, 13 / Math.max(camScale, 0.5));
+      ctx.fillStyle = priorityColors[p] + '50';
+      ctx.font = `700 ${labelSize}px -apple-system,system-ui,sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(priorityLabels[p] + ' (' + group.length + ')', gx, gy - zr + labelSize);
     }
 
     let hovered = null;
     for (const n of networkNodes) if (Math.hypot(n.x - mouseX, n.y - mouseY) < 28 / camScale) hovered = n;
+    const hovLinks = hovered ? new Set([hovered.id, ...hovered.links]) : null;
 
-    const nodeR = 22 / Math.max(camScale, 0.5);
-    const fontSize = Math.max(9, 11 / Math.max(camScale, 0.6));
-    const labelSize = Math.max(9, 12 / Math.max(camScale, 0.6));
+    for (const n of networkNodes) {
+      for (const lid of n.links) {
+        const m = nodeMap[lid];
+        if (!m) continue;
+        if (m.id > n.id) continue;
+        const isHighlighted = hovLinks && (hovLinks.has(n.id) && hovLinks.has(m.id));
+        const alpha = hovLinks ? (isHighlighted ? .7 : .08) : .3;
+        const lw = hovLinks && isHighlighted ? 2.5 / camScale : 1.5 / camScale;
+        const mx = (n.x + m.x) / 2, my = (n.y + m.y) / 2;
+        const dx = m.x - n.x, dy = m.y - n.y;
+        const cx = mx + dy * 0.12, cy = my - dx * 0.12;
+        ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.quadraticCurveTo(cx, cy, m.x, m.y);
+        const col = isHighlighted ? priorityColors[n.cluster] || '#999' : '#BDBDBD';
+        ctx.strokeStyle = col + (alpha < 0.1 ? '14' : alpha < 0.4 ? '55' : 'B0');
+        ctx.lineWidth = lw; ctx.stroke();
+      }
+    }
+
+    const nodeR = 20 / Math.max(camScale, 0.5);
+    const fontSize = Math.max(8, 10 / Math.max(camScale, 0.6));
+    const labelSize = Math.max(9, 11 / Math.max(camScale, 0.6));
 
     for (const n of networkNodes) {
       const col = priorityColor(n.priority);
       const isHov = n === hovered;
-      const r = isHov ? nodeR * 1.15 : nodeR;
+      const isLinked = hovLinks && hovLinks.has(n.id);
+      const dimmed = hovLinks && !isLinked;
+      const sizeBonus = Math.min(n.linkCount * 2, 10);
+      const r = (isHov ? nodeR * 1.2 : nodeR) + sizeBonus / camScale;
+      const nodeAlpha = dimmed ? .2 : 1;
 
-      ctx.beginPath(); ctx.arc(n.x, n.y, r + 3 / camScale, 0, Math.PI * 2);
-      ctx.fillStyle = col + '20'; ctx.fill();
+      ctx.globalAlpha = nodeAlpha;
+
+      if (isHov || isLinked) {
+        ctx.beginPath(); ctx.arc(n.x, n.y, r + 5 / camScale, 0, Math.PI * 2);
+        ctx.fillStyle = col + '18'; ctx.fill();
+      }
 
       ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
       ctx.fillStyle = col; ctx.fill();
+      if (isHov) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5 / camScale; ctx.stroke(); }
 
       ctx.fillStyle = '#fff';
       ctx.font = `600 ${fontSize}px -apple-system,system-ui,sans-serif`;
@@ -3076,7 +3175,15 @@ function initNetwork() {
       ctx.fillStyle = isHov ? '#212121' : '#616161';
       ctx.font = `${isHov ? '600 ' : ''}${labelSize}px -apple-system,system-ui,sans-serif`;
       ctx.textBaseline = 'top';
-      ctx.fillText(n.name, n.x, n.y + r + 6 / camScale);
+      const nameText = n.name.length > 16 ? n.name.slice(0, 14) + '…' : n.name;
+      ctx.fillText(nameText, n.x, n.y + r + 4 / camScale);
+      if (isHov && n.linkCount > 0) {
+        ctx.font = `500 ${Math.max(8, 9 / Math.max(camScale, 0.6))}px -apple-system,system-ui,sans-serif`;
+        ctx.fillStyle = col;
+        ctx.fillText(n.linkCount + ' Verbindung' + (n.linkCount !== 1 ? 'en' : ''), n.x, n.y + r + 4 / camScale + labelSize + 2 / camScale);
+      }
+
+      ctx.globalAlpha = 1;
     }
     ctx.restore();
     networkAnim = requestAnimationFrame(simulate);
@@ -3104,36 +3211,41 @@ function renderNetworkMobile() {
     return;
   }
 
-  const sorted = [...netContacts].sort((a, b) => {
-    const al = (a.links || []).length, bl = (b.links || []).length;
-    if (bl !== al) return bl - al;
-    return a.name.localeCompare(b.name);
-  });
-
   const priorityLabel = p => p === 'green' ? 'Heiß' : p === 'yellow' ? 'Warm' : 'Kalt';
+  const priorityIcon = p => p === 'green' ? '🔥' : p === 'yellow' ? '🟠' : '❄️';
   const borderColor = p => p === 'green' ? 'var(--safe-green)' : p === 'yellow' ? 'var(--fg-orange)' : 'var(--warn-red)';
   const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  container.innerHTML = sorted.map(c => {
-    const col = priorityColor(c.priority);
-    const initials = c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    const linkCount = (c.links || []).length;
-    const linkedCards = (c.links || []).map(lid => {
-      const lc = contacts.find(x => x.id === lid);
-      if (!lc) return '';
-      const lcol = priorityColor(lc.priority);
-      return `<div class="net-card-link" onclick="openDetail('${lc.id}')"><div class="net-card-link-dot" style="background:${lcol}"></div><span class="net-card-link-name">${esc(lc.name)}</span></div>`;
-    }).filter(Boolean).join('');
+  const groups = { green: [], yellow: [], red: [] };
+  netContacts.forEach(c => { (groups[c.priority || 'yellow'] = groups[c.priority || 'yellow'] || []).push(c); });
 
-    return `<div class="net-card" style="border-left-color:${borderColor(c.priority)}">
-      <div class="net-card-header" onclick="openDetail('${c.id}')">
-        <div class="net-card-avatar" style="background:${col}">${initials}</div>
-        <div><div class="net-card-name">${esc(c.name)}</div><div class="net-card-meta">${priorityLabel(c.priority)} · ${linkCount} Verbindung${linkCount !== 1 ? 'en' : ''}</div></div>
-        <div class="net-card-badge" style="background:${col}20;color:${col}">${linkCount}</div>
-      </div>
-      <div class="net-card-links">${linkedCards}</div>
-    </div>`;
-  }).join('');
+  let html = '';
+  for (const p of ['green', 'yellow', 'red']) {
+    const group = groups[p];
+    if (!group || group.length === 0) continue;
+    group.sort((a, b) => (b.links || []).length - (a.links || []).length || a.name.localeCompare(b.name));
+    html += `<div class="net-group-label">${priorityIcon(p)} ${priorityLabel(p)} (${group.length})</div>`;
+    html += group.map(c => {
+      const col = priorityColor(c.priority);
+      const initials = c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const linkCount = (c.links || []).length;
+      const linkedCards = (c.links || []).map(lid => {
+        const lc = contacts.find(x => x.id === lid);
+        if (!lc) return '';
+        const lcol = priorityColor(lc.priority);
+        return `<div class="net-card-link" onclick="openDetail('${lc.id}')"><div class="net-card-link-dot" style="background:${lcol}"></div><span class="net-card-link-name">${esc(lc.name)}</span></div>`;
+      }).filter(Boolean).join('');
+      return `<div class="net-card" style="border-left-color:${borderColor(c.priority)}">
+        <div class="net-card-header" onclick="openDetail('${c.id}')">
+          <div class="net-card-avatar" style="background:${col}">${initials}</div>
+          <div><div class="net-card-name">${esc(c.name)}</div><div class="net-card-meta">${linkCount} Verbindung${linkCount !== 1 ? 'en' : ''}</div></div>
+          <div class="net-card-badge" style="background:${col}20;color:${col}">${linkCount}</div>
+        </div>
+        <div class="net-card-links">${linkedCards}</div>
+      </div>`;
+    }).join('');
+  }
+  container.innerHTML = html;
 }
 
 // ===== FOCUS MODE =====
@@ -3413,6 +3525,54 @@ function importData(event) {
   event.target.value = '';
 }
 
+// ===== REMINDERS =====
+function checkReminders() {
+  const today = new Date().toISOString().slice(0, 10);
+  const overdue = contacts.filter(c => c.nextDate && c.nextDate < today && c.nextAction);
+  if (overdue.length === 0) return;
+  overdue.sort((a, b) => a.nextDate.localeCompare(b.nextDate));
+  const daysDiff = d => Math.floor((new Date(today) - new Date(d)) / 86400000);
+  document.getElementById('rem-title').textContent = `⚠️ ${overdue.length} überfällige Aufgabe${overdue.length > 1 ? 'n' : ''}`;
+  document.getElementById('rem-subtitle').textContent = 'Diese Aufgaben warten auf dich:';
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  document.getElementById('rem-list').innerHTML = overdue.slice(0, 8).map(c => {
+    const days = daysDiff(c.nextDate);
+    const ageCls = days > 7 ? 'age3' : days > 3 ? 'age2' : 'age1';
+    const daysText = days === 1 ? 'seit gestern' : `seit ${days} Tagen`;
+    return `<div class="reminder-item ${ageCls}">
+      <div class="rem-info">
+        <div class="rem-name">${esc(c.name)}</div>
+        <div class="rem-action">${esc(c.nextAction)} — <span class="rem-days">${daysText}</span></div>
+        <div class="rem-btns">
+          <button class="rem-btn rem-btn-done" onclick="reminderDone('${c.id}')">Erledigt ✓</button>
+          <button class="rem-btn rem-btn-push" onclick="reminderPush('${c.id}')">Auf heute</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('') + (overdue.length > 8 ? `<div style="text-align:center;padding:8px;font-size:.8rem;color:var(--gray-500)">+ ${overdue.length - 8} weitere</div>` : '');
+  document.getElementById('reminder-overlay').classList.add('open');
+}
+
+function closeReminder() {
+  document.getElementById('reminder-overlay').classList.remove('open');
+}
+
+function reminderDone(id) {
+  closeReminder();
+  openActionComplete(id);
+}
+
+function reminderPush(id) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  c.nextDate = new Date().toISOString().slice(0, 10);
+  c.updatedAt = new Date().toISOString();
+  save();
+  toast(c.name + ' auf heute verschoben');
+  checkReminders();
+  renderDashboard();
+}
+
 // ===== PASSWORD AUTH =====
 async function hashPin(pin) {
   const data = new TextEncoder().encode(pin + 'KontaktFlow_Salt_2024');
@@ -3491,6 +3651,7 @@ async function checkPin() {
     startSync();
     autoBackup();
     renderDashboard();
+    setTimeout(checkReminders, 600);
   } else {
     failedAttempts++;
     const delay = getLockoutDelay();
