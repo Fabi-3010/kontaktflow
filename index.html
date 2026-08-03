@@ -831,6 +831,10 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .btn-beratung{background:var(--fg-blue);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .2s}
 .btn-beratung:hover{opacity:.85}
 .btn-beratung svg{width:16px;height:16px}
+.bp-card{background:var(--gray-50);border:1px solid var(--gray-200);border-left:3px solid var(--fg-blue);border-radius:var(--radius-sm);padding:14px 16px}
+.bp-text{font-size:.88rem;line-height:1.7;color:var(--gray-700);white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;margin-bottom:10px}
+.bp-edit{background:var(--fg-blue);color:#fff;border:none;padding:6px 14px;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:opacity .15s}
+.bp-edit:hover{opacity:.85}
 .beratung-suggest{display:flex;flex-wrap:wrap;gap:6px;padding:0 24px 10px;flex-shrink:0;min-height:0;max-height:80px;overflow-y:auto}
 .beratung-suggest:empty{display:none}
 .bs-chip{padding:6px 14px;background:var(--fg-blue);color:#fff;border-radius:20px;font-size:.82rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .15s;border:none;line-height:1.3}
@@ -2573,6 +2577,15 @@ function openDetail(id) {
         ` : ''}
       </div>
       ${c.notes ? `<div class="detail-section"><h3>Notizen</h3><div class="detail-section-bar"></div><p style="font-size:.88rem;line-height:1.6;color:var(--gray-700)">${esc(c.notes)}</p></div>` : ''}
+      ${c.beratungNotes ? `
+      <div class="detail-section">
+        <h3>Beratungsprotokoll</h3>
+        <div class="detail-section-bar" style="background:var(--fg-blue)"></div>
+        <div class="bp-card">
+          <div class="bp-text">${esc(c.beratungNotes)}</div>
+          <button class="bp-edit" onclick="startBeratung('${c.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Bearbeiten</button>
+        </div>
+      </div>` : ''}
       <div class="detail-section">
         <h3>Verknüpfte Kontakte (${linked.length})</h3>
         <div class="detail-section-bar"></div>
