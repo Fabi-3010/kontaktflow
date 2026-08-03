@@ -280,6 +280,43 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .task-done{background:var(--safe-green);color:#fff;border:none;padding:5px 12px;font-size:.72rem;font-weight:600;border-radius:8px;cursor:pointer;flex-shrink:0;transition:all .15s}
 .task-done:hover{background:#6fa00f}
 .task-section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px;color:var(--gray-500)}
+.tasks-filter{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tf-btn{padding:7px 16px;border:1px solid var(--gray-300);border-radius:20px;background:var(--white);color:var(--gray-600);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.tf-btn.active{background:var(--fg-blue);color:#fff;border-color:var(--fg-blue)}
+.tf-btn:hover:not(.active){background:var(--gray-50);border-color:var(--gray-400)}
+.tv-card{background:var(--white);border-radius:var(--radius-sm);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden;border-left:3px solid var(--gray-300);transition:box-shadow .15s}
+.tv-card.overdue{border-left-color:var(--warn-red);background:rgba(204,41,54,.02)}
+.tv-card.today{border-left-color:var(--safe-green);background:rgba(134,184,23,.02)}
+.tv-card.upcoming{border-left-color:var(--fg-blue)}
+.tv-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.tv-header:hover{background:var(--gray-50)}
+.tv-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.tv-info{flex:1;min-width:0}
+.tv-name{font-weight:600;font-size:.9rem;color:var(--gray-900)}
+.tv-meta{font-size:.78rem;color:var(--gray-500);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tv-action-chip{padding:2px 8px;border-radius:5px;background:var(--gray-50);border:1px dashed var(--gray-300);font-size:.76rem;cursor:pointer}
+.tv-date{font-size:.76rem;font-weight:600;flex-shrink:0;white-space:nowrap}
+.tv-chevron{color:var(--gray-400);font-size:.8rem;transition:transform .2s;flex-shrink:0}
+.tv-card.expanded .tv-chevron{transform:rotate(90deg)}
+.tv-body{display:none;padding:0 16px 16px;border-top:1px solid var(--gray-100)}
+.tv-card.expanded .tv-body{display:block}
+.tv-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.tv-notes{width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;resize:vertical;min-height:60px;background:var(--white);transition:border-color .2s;margin-top:10px}
+.tv-notes:focus{outline:none;border-color:var(--fg-blue);box-shadow:0 0 0 3px rgba(0,122,203,.08)}
+.tv-notes-saved{font-size:.7rem;color:var(--safe-green);margin-top:4px;opacity:0;transition:opacity .3s}
+.tv-notes-saved.show{opacity:1}
+.tv-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.tv-btn{padding:6px 12px;border-radius:6px;border:none;font-size:.76rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.tv-btn-primary{background:var(--fg-blue);color:#fff}
+.tv-btn-primary:hover{background:var(--fg-blue-dark)}
+.tv-btn-green{background:var(--safe-green);color:#fff}
+.tv-btn-green:hover{background:#6fa00f}
+.tv-btn-outline{background:var(--white);color:var(--gray-600);border:1px solid var(--gray-300)}
+.tv-btn-outline:hover{background:var(--gray-50)}
+.tv-history{margin-top:10px}
+.tv-history-title{font-size:.72rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px}
+.tv-history-item{font-size:.76rem;color:var(--gray-600);padding:4px 0;border-bottom:1px solid var(--gray-100)}
+.tv-empty{text-align:center;padding:40px 20px;color:var(--gray-500);font-size:.9rem}
 .edit-action-pop{position:fixed;inset:0;background:rgba(0,58,107,.35);backdrop-filter:blur(6px);z-index:1100;display:none;align-items:flex-end;justify-content:center;padding:0}
 .edit-action-pop.open{display:flex}
 .edit-action-sheet{background:var(--white);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:480px;padding:0;box-shadow:0 -10px 40px rgba(0,0,0,.15);animation:sheetUp .25s ease}
@@ -811,6 +848,10 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Dashboard
     </li>
+    <li data-view="tasks" onclick="switchView('tasks')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Aufgaben
+    </li>
     <li data-view="contacts" onclick="switchView('contacts')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       Kontakte
@@ -919,6 +960,22 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
   </div>
 
   <!-- CONTACTS -->
+  <!-- AUFGABEN -->
+  <div class="view" id="view-tasks">
+    <div class="page-header">
+      <h1>Aufgaben</h1>
+    </div>
+    <div class="page-content">
+      <div class="tasks-filter" id="tasks-filter">
+        <button class="tf-btn active" onclick="filterTasks('all',this)">Alle</button>
+        <button class="tf-btn" onclick="filterTasks('overdue',this)">Überfällig</button>
+        <button class="tf-btn" onclick="filterTasks('today',this)">Heute</button>
+        <button class="tf-btn" onclick="filterTasks('upcoming',this)">Geplant</button>
+      </div>
+      <div id="tasks-list"></div>
+    </div>
+  </div>
+
   <div class="view" id="view-contacts">
     <div class="page-header">
       <h1>Kontakte</h1>
@@ -1468,6 +1525,7 @@ function refreshCurrentView() {
   if (!active) return;
   const view = active.dataset.view;
   if (view === 'dashboard') renderDashboard();
+  else if (view === 'tasks') renderTasks();
   else if (view === 'contacts') renderContacts();
   else if (view === 'pipeline') renderPipeline();
   else if (view === 'kunden') renderKunden();
@@ -1612,6 +1670,7 @@ function switchView(name) {
     li.classList.toggle('active', li.dataset.view === name);
   });
   if (name === 'dashboard') renderDashboard();
+  if (name === 'tasks') renderTasks();
   if (name === 'contacts') renderContacts();
   if (name === 'focus') renderFocusStart();
   if (name === 'pipeline') renderPipeline();
@@ -1768,6 +1827,102 @@ function renderSidebarStats() {
     <div class="stat-row"><span>Offene Aktionen</span><span>${withAction}</span></div>
     <div class="stat-row"><span>Verknüpft</span><span>${linked}</span></div>
   `;
+}
+
+// ===== AUFGABEN VIEW =====
+let tasksFilterMode = 'all';
+
+function filterTasks(mode, btn) {
+  tasksFilterMode = mode;
+  document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTasks();
+}
+
+function renderTasks() {
+  const today = new Date().toISOString().slice(0, 10);
+  const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let allTasks = contacts.filter(c => c.nextAction && c.nextDate);
+
+  if (tasksFilterMode === 'overdue') allTasks = allTasks.filter(c => c.nextDate < today);
+  else if (tasksFilterMode === 'today') allTasks = allTasks.filter(c => c.nextDate === today);
+  else if (tasksFilterMode === 'upcoming') allTasks = allTasks.filter(c => c.nextDate >= today);
+
+  allTasks.sort((a, b) => a.nextDate.localeCompare(b.nextDate));
+
+  const listEl = document.getElementById('tasks-list');
+  if (allTasks.length === 0) {
+    listEl.innerHTML = '<div class="tv-empty">Keine Aufgaben in dieser Ansicht</div>';
+    return;
+  }
+
+  const daysDiff = d => Math.floor((new Date(today) - new Date(d)) / 86400000);
+
+  let lastSection = '';
+  listEl.innerHTML = allTasks.map(c => {
+    const isPast = c.nextDate < today;
+    const isToday = c.nextDate === today;
+    const cls = isPast ? 'overdue' : isToday ? 'today' : 'upcoming';
+    const section = isPast ? 'Überfällig' : isToday ? 'Heute' : formatDate(c.nextDate);
+    let sectionHtml = '';
+    if (section !== lastSection) { lastSection = section; sectionHtml = `<div class="task-section-label">${isPast ? '⚠️ ' : isToday ? '🟢 ' : ''}${section}</div>`; }
+    const dateColor = isPast ? 'var(--warn-red)' : isToday ? 'var(--safe-green)' : 'var(--fg-blue)';
+    const daysLabel = isPast ? ' (vor ' + daysDiff(c.nextDate) + (daysDiff(c.nextDate) === 1 ? ' Tag' : ' Tagen') + ')' : '';
+    const history = (c.actionLog || []).slice(-5).reverse();
+    const historyHtml = history.length > 0 ? `<div class="tv-history"><div class="tv-history-title">Letzte Aktivitäten</div>${history.map(h =>
+      `<div class="tv-history-item">${esc(h.action)}${h.outcome ? ' → ' + esc(h.outcome) : ''} — ${formatDate(h.date)}</div>`
+    ).join('')}</div>` : '';
+
+    return sectionHtml + `
+      <div class="tv-card ${cls}" id="tv-${c.id}">
+        <div class="tv-header" onclick="toggleTaskCard('${c.id}')">
+          <div class="tv-dot" style="background:${priorityColor(c.priority)}"></div>
+          <div class="tv-info">
+            <div class="tv-name">${esc(c.name)}</div>
+            <div class="tv-meta">
+              <span class="tv-action-chip" onclick="event.stopPropagation();openEditAction('${c.id}')">${esc(c.nextAction)}</span>
+              ${c.phone ? '<span>📞 ' + esc(c.phone) + '</span>' : ''}
+            </div>
+          </div>
+          <span class="tv-date" style="color:${dateColor}">${isPast ? '⚠️ ' : ''}${formatDate(c.nextDate)}${daysLabel}</span>
+          <span class="tv-chevron">▸</span>
+        </div>
+        <div class="tv-body">
+          <div class="tv-row">
+            <span style="font-size:.78rem;color:var(--gray-500)">Pipeline: <strong>${esc((PIPELINE_STAGES.find(s=>s.id===(c.pipeline||'offen'))||{}).label||'Offen')}</strong></span>
+            <span style="font-size:.78rem;color:var(--gray-500)">Priorität: <strong style="color:${priorityColor(c.priority)}">${c.priority==='green'?'Heiß':c.priority==='red'?'Kalt':'Warm'}</strong></span>
+            ${c.lastSeen ? '<span style="font-size:.78rem;color:var(--gray-500)">Gesehen: <strong>' + formatDate(c.lastSeen) + '</strong></span>' : ''}
+          </div>
+          <textarea class="tv-notes" placeholder="Notizen zu dieser Aufgabe... (z.B. welche Versicherung, was besprochen, nächste Schritte)" oninput="saveTaskNote('${c.id}', this.value)">${esc(c.taskNotes || '')}</textarea>
+          <div class="tv-notes-saved" id="tv-saved-${c.id}">✓ Gespeichert</div>
+          <div class="tv-actions">
+            <button class="tv-btn tv-btn-green" onclick="openActionComplete('${c.id}')">Erledigt ✓</button>
+            <button class="tv-btn tv-btn-primary" onclick="openEditAction('${c.id}')">Bearbeiten</button>
+            <button class="tv-btn tv-btn-outline" onclick="openDetail('${c.id}')">Kontakt öffnen</button>
+          </div>
+          ${historyHtml}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleTaskCard(id) {
+  const el = document.getElementById('tv-' + id);
+  if (el) el.classList.toggle('expanded');
+}
+
+let taskNoteSaveTimer = null;
+function saveTaskNote(id, value) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  c.taskNotes = value;
+  c.updatedAt = new Date().toISOString();
+  clearTimeout(taskNoteSaveTimer);
+  taskNoteSaveTimer = setTimeout(() => {
+    save();
+    const saved = document.getElementById('tv-saved-' + id);
+    if (saved) { saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500); }
+  }, 800);
 }
 
 // ===== CONTACTS =====
