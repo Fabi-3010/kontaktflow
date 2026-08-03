@@ -831,11 +831,19 @@ main{position:fixed;left:240px;top:0;right:0;bottom:0;overflow-y:auto;padding:0}
 .btn-beratung{background:var(--fg-blue);color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-sm);font-size:.82rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .2s}
 .btn-beratung:hover{opacity:.85}
 .btn-beratung svg{width:16px;height:16px}
+.beratung-suggest{display:flex;flex-wrap:wrap;gap:6px;padding:0 24px 10px;flex-shrink:0;min-height:0;max-height:80px;overflow-y:auto}
+.beratung-suggest:empty{display:none}
+.bs-chip{padding:6px 14px;background:var(--fg-blue);color:#fff;border-radius:20px;font-size:.82rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .15s;border:none;line-height:1.3}
+.bs-chip:hover{opacity:.8}
+.bs-chip:active{transform:scale(.96)}
+.bs-hint{font-size:.72rem;color:var(--gray-400);padding:4px 0;align-self:center}
 @media(max-width:600px){
   .beratung-header{padding:14px 16px}
   .beratung-body{padding:14px 16px}
   .beratung-notes{font-size:1rem;padding:12px 14px}
   .beratung-footer{padding:10px 16px}
+  .beratung-suggest{padding:0 16px 8px;gap:5px}
+  .bs-chip{padding:5px 12px;font-size:.78rem}
 }
 </style>
 </head>
@@ -1956,6 +1964,69 @@ function saveTaskNote(id, value) {
 let beratungContactId = null;
 let beratungSaveTimer = null;
 
+const BERATUNG_DICT = [
+  'KFZ-Versicherung','KFZ-Haftpflicht','KFZ-Vollkasko','KFZ-Teilkasko','KFZ-Wechsel',
+  'Lebensversicherung','Risikolebensversicherung','Kapitallebensversicherung',
+  'Berufsunfähigkeitsversicherung','BU-Versicherung','BU-Rente','BU-Nachversicherung',
+  'Hausratversicherung','Hausrat erweitern','Hausrat Elementar',
+  'Haftpflichtversicherung','Privathaftpflicht','Tierhalterhaftpflicht','Gewerbehaftpflicht',
+  'Wohngebäudeversicherung','Gebäudeversicherung','Elementarversicherung',
+  'Rechtsschutzversicherung','Verkehrsrechtsschutz','Privatrechtsschutz',
+  'Unfallversicherung','Kinderunfallversicherung',
+  'Krankenversicherung','Private Krankenversicherung','Gesetzliche Krankenversicherung','PKV','GKV',
+  'Krankenzusatzversicherung','Krankentagegeld','Krankenhaustagegeld',
+  'Zahnzusatzversicherung','Zahnersatz','Zahnprophylaxe',
+  'Pflegeversicherung','Pflegezusatzversicherung','Pflege-Bahr',
+  'Rentenversicherung','Private Rentenversicherung','Riester-Rente','Rürup-Rente','Betriebsrente','bAV',
+  'Reiseversicherung','Reiserücktrittsversicherung','Auslandskrankenversicherung',
+  'Altersvorsorge','Vermögensaufbau','Fondspolice','ETF-Police',
+  'Selbstbeteiligung','Schadenfreiheitsklasse','Deckungssumme','Beitrag','Prämie','Laufzeit',
+  'Vergleich erstellen','Angebot erstellen','Angebot zusenden','Antrag unterschreiben',
+  'Vollkasko','Teilkasko','Rabattschutz','Schutzbrief','Mallorca-Police',
+  'Nachfassen','Rückruf vereinbart','Unterlagen zusenden','Termin vereinbaren',
+  'Bestandsaufnahme','Versorgungslücke','Absicherung','Deckungskonzept',
+  'Kunde wünscht','Kunde hat','Kunde möchte','Kunde interessiert sich für',
+  'Ehepartner mitversichern','Kinder mitversichern','Familientarif',
+  'Vertrag kündigen','Vertrag wechseln','Vertrag anpassen','Vertragslaufzeit',
+  'Beitragsfrei stellen','Dynamik','Beitragserhöhung','Beitragsbefreiung',
+  'Schaden melden','Schadenfall','Schadensregulierung',
+  'Gesundheitsfragen','Gesundheitsprüfung','Vorerkrankung','Risikovoranfrage'
+];
+
+function getBeratungWord(ta) {
+  const pos = ta.selectionStart;
+  const text = ta.value.substring(0, pos);
+  const match = text.match(/[\wäöüÄÖÜß-]+$/);
+  return match ? { word: match[0], start: pos - match[0].length, end: pos } : null;
+}
+
+function updateBeratungSuggest() {
+  const ta = document.getElementById('beratung-notes');
+  const bar = document.getElementById('beratung-suggest');
+  const info = getBeratungWord(ta);
+  if (!info || info.word.length < 2) { bar.innerHTML = ''; return; }
+  const w = info.word.toLowerCase();
+  const matches = BERATUNG_DICT.filter(d => d.toLowerCase().includes(w) && d.toLowerCase() !== w).slice(0, 8);
+  if (matches.length === 0) { bar.innerHTML = ''; return; }
+  bar.innerHTML = matches.map(m => `<button class="bs-chip" onmousedown="insertSuggest(event,'${m.replace(/'/g,"\\'")}')">` + m.replace(new RegExp('(' + info.word.replace(/[-]/g,'\\$&') + ')', 'gi'), '<strong>$1</strong>') + '</button>').join('');
+}
+
+function insertSuggest(e, text) {
+  e.preventDefault();
+  const ta = document.getElementById('beratung-notes');
+  const info = getBeratungWord(ta);
+  if (!info) return;
+  const before = ta.value.substring(0, info.start);
+  const after = ta.value.substring(info.end);
+  ta.value = before + text + after;
+  const newPos = info.start + text.length;
+  ta.setSelectionRange(newPos, newPos);
+  ta.focus();
+  document.getElementById('beratung-suggest').innerHTML = '';
+  clearTimeout(beratungSaveTimer);
+  beratungSaveTimer = setTimeout(() => saveBeratungNotes(), 800);
+}
+
 function startBeratung(id) {
   const c = contacts.find(x => x.id === id);
   if (!c) return;
@@ -1964,11 +2035,13 @@ function startBeratung(id) {
   document.getElementById('beratung-title').innerHTML = 'Beratung &mdash; <span>' + esc(c.name) + '</span>';
   const ta = document.getElementById('beratung-notes');
   ta.value = c.beratungNotes || '';
+  document.getElementById('beratung-suggest').innerHTML = '';
   document.getElementById('beratung-saved').classList.remove('show');
   updateBeratungTime();
   document.getElementById('beratung-overlay').classList.add('open');
   setTimeout(() => ta.focus(), 200);
   ta.oninput = function() {
+    updateBeratungSuggest();
     clearTimeout(beratungSaveTimer);
     beratungSaveTimer = setTimeout(() => saveBeratungNotes(), 800);
   };
@@ -4058,6 +4131,7 @@ renderLogin();
     <h2 id="beratung-title">Beratung</h2>
     <button class="beratung-close" onclick="endBeratung()">Beratung beenden</button>
   </div>
+  <div class="beratung-suggest" id="beratung-suggest"></div>
   <div class="beratung-body">
     <textarea class="beratung-notes" id="beratung-notes" spellcheck="true" lang="de" placeholder="Notizen hier eingeben..."></textarea>
   </div>
